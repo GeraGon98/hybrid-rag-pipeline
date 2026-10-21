@@ -155,14 +155,21 @@ El SLA del proveedor de enlaces (NetLink) establece una disponibilidad mensual d
   hybrid_rerank · relevancia 0.505 (reranker, umbral 0.01) · chunks RB-02#reporte-al-proveedor, SLA-B#disponibilidad, ... · 1 llamadas · 868/458 tokens · 1733 ms · $0.000405
 ```
 
-## Entregables / criterios de terminado
+## Capacidades verificadas
 
-- [x] `data/docs/` con al menos 30 documentos ficticios de operaciones y `data/eval_questions.jsonl` con 40 preguntas y su `chunk_id` esperado
-- [x] Tabla de recall@5 y MRR para `vector`, `bm25`, `hybrid` y `hybrid_rerank`, publicada en este README
-- [x] Cada respuesta incluye citas; el validador rechaza citas que no estén en el contexto recuperado
-- [x] Si no hay contexto relevante (score bajo el umbral), responde "no encontré información" en lugar de inventar
-- [x] Cada llamada queda en `logs/llm_calls.jsonl` con proveedor, tokens, latencia, costo y `retrieval_strategy`
-- [x] `uv run pytest -q` pasa sin red; `ruff check` limpio
+- 93 pruebas automatizadas sin red ni modelos y análisis estático limpio con Ruff.
+- Corpus sintético reproducible de 32 documentos, 103 chunks y 40 preguntas etiquetadas.
+- Recall@5 de 0.963, hit@5 de 1.000 y MRR de 0.944 con recuperación híbrida y reranking.
+- Las 4 preguntas sin respuesta se rechazaron antes de llamar al LLM mediante un umbral
+  calibrado del cross-encoder.
+- 33 de 36 respuestas contestables citaron uno de los chunks esperados.
+- Ninguna cita inválida superó el contrato después de las reparaciones.
+- El validador exige que cada `chunk_id` exista en el contexto y que el fragmento citado
+  aparezca de forma textual.
+- La telemetría registra estrategia, chunks, proveedor, tokens, latencia y costo sin
+  guardar el contenido de la pregunta.
+- La evaluación completa de 40 respuestas costó $0.013 con fallback automático entre
+  proveedores.
 
 ## Notas de diseño
 
@@ -171,12 +178,15 @@ El SLA del proveedor de enlaces (NetLink) establece una disponibilidad mensual d
 - **`chunk_id` determinista.** Se deriva del documento y del encabezado, así que el dataset de evaluación sobrevive a reindexaciones mientras no cambien los títulos de sección.
 - **Windows.** En carpetas de OneDrive `uv` no puede usar hardlinks: usa `--link-mode=copy` o `UV_LINK_MODE=copy`. Smart App Control puede bloquear la primera carga de algunas DLL de scikit-learn; un segundo intento las carga.
 
-## Base reutilizada del bootcamp
+## Diseño y componentes reutilizables
 
-Piezas del Agente Operador (Bootcamp AI Engineer, Código Facilito) que se copian y adaptan, sin depender de ese repo:
+El proyecto separa proveedores, recuperación, contexto y generación para que cada capa
+pueda evaluarse o sustituirse de forma independiente:
 
 - `core/llm_client.py`: reintentos y fallback multi-proveedor (Gemini, Groq, Ollama)
 - `core/logger.py` y `core/pricing.py`: costo y latencia por llamada
 - `contracts/structured_output.py`: Pydantic más reparación
 - `prompting/promptkit.py`: prompts YAML versionados
 - `context/manager.py`: presupuesto de tokens por sección para el contexto recuperado
+- `retrieval/`: índices vectorial y BM25, fusión RRF, reranking y métricas desacopladas
+- `generation/rag.py`: orquestación del umbral, contexto y respuesta con citas verificables
