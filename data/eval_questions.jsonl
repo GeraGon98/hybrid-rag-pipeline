@@ -1,0 +1,40 @@
+{"id": "Q01", "question": "¿Qué significa el error ORN-503?", "expected_chunk_ids": ["RB-01#sintomas"], "kind": "lexical"}
+{"id": "Q02", "question": "¿Qué es el ticket T-1042?", "expected_chunk_ids": ["RB-07#descripcion-del-problema", "RB-07#prevencion"], "kind": "lexical"}
+{"id": "Q03", "question": "¿Qué hace el job INV-SYNC cuando recibe un SKU largo?", "expected_chunk_ids": ["RB-07#causa-raiz-conocida"], "kind": "lexical"}
+{"id": "Q04", "question": "¿A qué teléfono se reporta el circuito MPLS-NL-7781?", "expected_chunk_ids": ["RB-02#reporte-al-proveedor"], "kind": "lexical"}
+{"id": "Q05", "question": "¿Dónde se abren los casos con el número de cliente OR-55120?", "expected_chunk_ids": ["SLA-D#canal-de-contacto"], "kind": "lexical"}
+{"id": "Q06", "question": "¿Qué hago si GW-VPN-02 no acepta conexiones?", "expected_chunk_ids": ["RB-10#solucion-temporal", "RB-10#diagnostico", "RB-10#sintomas"], "kind": "lexical"}
+{"id": "Q07", "question": "¿Para qué sirve el reporte CONC-02?", "expected_chunk_ids": ["RB-07#correccion"], "kind": "lexical"}
+{"id": "Q08", "question": "¿Qué es el formato ALTA-01?", "expected_chunk_ids": ["RB-12#solicitud"], "kind": "lexical"}
+{"id": "Q09", "question": "¿Qué penalización aplica el SLA-B?", "expected_chunk_ids": ["SLA-B#penalizaciones"], "kind": "lexical"}
+{"id": "Q10", "question": "¿Cómo se recalibra una Zebra ZT411?", "expected_chunk_ids": ["RB-06#solucion-rapida"], "kind": "lexical"}
+{"id": "Q11", "question": "¿Qué contiene la carpeta /data/spool?", "expected_chunk_ids": ["RB-09#limpieza-segura"], "kind": "lexical"}
+{"id": "Q12", "question": "¿Qué es la cola PRN-ANDEN?", "expected_chunk_ids": ["RB-06#cola-de-impresion"], "kind": "lexical"}
+{"id": "Q13", "question": "¿Cuál es el tiempo de respuesta P1 en el SLA-D?", "expected_chunk_ids": ["SLA-D#prioridades-y-tiempos"], "kind": "lexical"}
+{"id": "Q14", "question": "¿Cada cuánto debo cambiar mi contraseña?", "expected_chunk_ids": ["POL-02#requisitos-de-contrasena"], "kind": "semantic"}
+{"id": "Q15", "question": "Perdí mi laptop en el aeropuerto, ¿qué hago?", "expected_chunk_ids": ["POL-06#perdida-o-robo"], "kind": "semantic"}
+{"id": "Q16", "question": "¿Cuánto me pagan por estar disponible fuera de horario una semana?", "expected_chunk_ids": ["POL-04#compensacion"], "kind": "semantic"}
+{"id": "Q17", "question": "¿Puedo hacer cambios en producción a fin de mes?", "expected_chunk_ids": ["POL-03#ventanas-de-mantenimiento"], "kind": "semantic"}
+{"id": "Q18", "question": "¿Cuánto puedo gastar en comida cuando viajo a otra ciudad por trabajo?", "expected_chunk_ids": ["POL-07#montos"], "kind": "semantic"}
+{"id": "Q19", "question": "Las sucursales no ven el sistema pero sí tienen internet, ¿qué reviso?", "expected_chunk_ids": ["RB-02#sintomas", "RB-02#diagnostico"], "kind": "semantic"}
+{"id": "Q20", "question": "Alguien cayó en un correo falso y dio su clave, ¿cuál es el primer paso?", "expected_chunk_ids": ["RB-05#contencion-inmediata"], "kind": "semantic"}
+{"id": "Q21", "question": "¿Cuánto tiempo aguanta el centro de datos sin luz antes de que arranque la planta?", "expected_chunk_ids": ["RB-11#respuesta-inicial"], "kind": "semantic"}
+{"id": "Q22", "question": "¿En qué orden se vuelven a prender los equipos cuando regresa la energía?", "expected_chunk_ids": ["RB-11#recuperacion"], "kind": "semantic"}
+{"id": "Q23", "question": "¿Cuánto tiempo se guardan las copias de seguridad diarias?", "expected_chunk_ids": ["POL-05#periodos-de-retencion", "SLA-I#retencion"], "kind": "semantic"}
+{"id": "Q24", "question": "¿Quién coordina una falla grave y qué no debe hacer?", "expected_chunk_ids": ["POL-01#roles"], "kind": "semantic"}
+{"id": "Q25", "question": "¿Cuánto tiempo máximo puede estar caído el sistema del almacén según el plan de continuidad?", "expected_chunk_ids": ["POL-10#objetivos-por-sistema"], "kind": "semantic"}
+{"id": "Q26", "question": "¿Qué hago si las etiquetas salen sin nada impreso?", "expected_chunk_ids": ["RB-06#solucion-rapida"], "kind": "semantic"}
+{"id": "Q27", "question": "¿Con cuánta anticipación debe avisar recursos humanos que entra alguien nuevo?", "expected_chunk_ids": ["RB-12#solicitud"], "kind": "semantic"}
+{"id": "Q28", "question": "¿Qué pasa si un montacargas se descompone por más de dos días?", "expected_chunk_ids": ["SLA-F#fallas", "SLA-F#penalizaciones"], "kind": "semantic"}
+{"id": "Q29", "question": "¿Cuál es el SLA del proveedor de enlaces?", "expected_chunk_ids": ["SLA-B#tiempos-de-respuesta-y-resolucion", "SLA-B#disponibilidad"], "kind": "mixed"}
+{"id": "Q30", "question": "¿Qué disponibilidad garantiza Telcom Express?", "expected_chunk_ids": ["SLA-A#disponibilidad"], "kind": "mixed"}
+{"id": "Q31", "question": "¿Cada cuánto se rotan las contraseñas de las cuentas de servicio?", "expected_chunk_ids": ["POL-02#cuentas-de-servicio"], "kind": "mixed"}
+{"id": "Q32", "question": "¿Cuándo se reúne el CAB?", "expected_chunk_ids": ["POL-03#comite-cab"], "kind": "mixed"}
+{"id": "Q33", "question": "¿Qué RPO tiene el ERP Orion?", "expected_chunk_ids": ["POL-10#objetivos-por-sistema"], "kind": "mixed"}
+{"id": "Q34", "question": "¿Cuál es el plazo para publicar un postmortem?", "expected_chunk_ids": ["POL-11#plazo-y-formato"], "kind": "mixed"}
+{"id": "Q35", "question": "¿Qué proveedores se consideran críticos?", "expected_chunk_ids": ["POL-09#proveedores-criticos"], "kind": "mixed"}
+{"id": "Q36", "question": "¿Cuántos usuarios simultáneos soporta la VPN?", "expected_chunk_ids": ["RB-10#diagnostico"], "kind": "mixed"}
+{"id": "Q37", "question": "¿Cuál es la política de trabajo remoto para el personal de oficina?", "expected_chunk_ids": [], "kind": "no_answer"}
+{"id": "Q38", "question": "¿Cuál es el SLA de Amazon Web Services?", "expected_chunk_ids": [], "kind": "no_answer"}
+{"id": "Q39", "question": "¿Cuántos días de vacaciones corresponden por año?", "expected_chunk_ids": [], "kind": "no_answer"}
+{"id": "Q40", "question": "¿Cómo configuro la impresora 3D del laboratorio?", "expected_chunk_ids": [], "kind": "no_answer"}
