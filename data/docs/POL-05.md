@@ -1,20 +1,24 @@
 ---
 id: POL-05
-titulo: Retención de respaldos
-tipo: politica
-fecha: 2025-09-01
+title: Backup Retention
+type: policy
+date: '2025-09-01'
+section_slugs:
+  Retention Periods: periodos-de-retencion
+  Testing: pruebas
+  Responsibilities: responsables
 ---
 
-# POL-05 · Retención de respaldos
+# POL-05 · Backup Retention
 
-## Periodos de retención
+## Retention Periods
 
-Diarios: 35 días. Mensuales: 12 meses. Anuales de información fiscal: 5 años.
+Daily: 35 days. Monthly: 12 months. Annual fiscal information: 5 years.
 
-## Pruebas
+## Testing
 
-Cada trimestre se restaura al menos un sistema crítico completo en un ambiente aislado y se documenta el tiempo real de recuperación.
+At least one critical system is restored quarterly in an isolated environment, and the real-time recovery time is documented.
 
-## Responsables
+## Responsibilities
 
-El equipo de infraestructura opera los respaldos; el dueño de cada sistema valida la prueba de restauración.
+The infrastructure team operates the backups; the owner of each system validates the restoration test.

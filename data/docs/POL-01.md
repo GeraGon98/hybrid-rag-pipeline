@@ -1,24 +1,29 @@
 ---
 id: POL-01
-titulo: Gestión de incidentes
-tipo: politica
-fecha: 2025-09-15
+title: Incident Management
+type: policy
+date: '2025-09-15'
+section_slugs:
+  Priorities: prioridades
+  Internal Target Times: tiempos-objetivo-internos
+  Roles: roles
+  Closure: cierre
 ---
 
-# POL-01 · Gestión de incidentes
+# POL-01 · Incident Management
 
-## Prioridades
+## Priorities
 
-P1: operación detenida en uno o más centros de distribución o sistema crítico caído. P2: degradación severa con alternativa manual. P3: afecta a un usuario o área sin detener la operación. P4: solicitudes y consultas.
+P1: Operation halted at one or more distribution centers or critical system down. P2: Severe degradation with manual alternative. P3: Affects a user or area without halting operation. P4: Requests and inquiries.
 
-## Tiempos objetivo internos
+## Internal Target Times
 
-Atención de P1 en 15 minutos y comunicación de estado cada 30 minutos. P2 en 1 hora. P3 en 8 horas hábiles.
+P1 response within 15 minutes and status communication every 30 minutes. P2 within 1 hour. P3 within 8 business hours.
 
 ## Roles
 
-Cada P1 tiene un coordinador de incidente que dirige la llamada y un responsable de comunicación con el negocio. Ninguno de los dos debe ejecutar cambios técnicos.
+Each P1 has an Incident Coordinator who leads the call and a Business Communication Owner. Neither of the two may execute technical changes.
 
-## Cierre
+## Closure
 
-Un incidente P1 o P2 se cierra solo cuando el usuario confirma el servicio y se agenda el postmortem según POL-11.
+An P1 or P2 incident closes only when the user confirms service restoration and the postmortem is scheduled according to POL-11.

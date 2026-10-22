@@ -1,20 +1,24 @@
 ---
 id: SLA-G
-titulo: RutaVeloz, transporte de última milla
-tipo: sla
-fecha: 2025-10-01
+title: RutaVeloz, last-mile delivery
+type: sla
+date: '2025-10-01'
+section_slugs:
+  Delivery Times: tiempos-de-entrega
+  Metrics: indicadores
+  Non-Compliance: incumplimiento
 ---
 
-# SLA-G · RutaVeloz, transporte de última milla
+# SLA-G · RutaVeloz, last-mile delivery
 
-## Tiempos de entrega
+## Delivery Times
 
-Entregas locales en 24 horas y foráneas en 48 horas desde la recolección en el centro de distribución.
+Local deliveries within 24 hours and out-of-area deliveries within 48 hours from pickup at the distribution center.
 
-## Indicadores
+## Metrics
 
-Entregas a tiempo de al menos 95 % mensual y tasa de daño menor a 0.5 % de los paquetes.
+On-time delivery rate of at least 95 % monthly and damage rate below 0.5 % of packages.
 
-## Incumplimiento
+## Non-Compliance
 
-Si el indicador de entregas a tiempo baja de 95 % dos meses seguidos, se activa una revisión del contrato según POL-09.
+If the on-time delivery rate drops below 95 % for two consecutive months, a contract review is triggered according to POL-09.

@@ -1,7 +1,7 @@
 [project]
 name = "hybrid-rag-pipeline"
 version = "0.1.0"
-description = "RAG híbrido (vectorial + BM25 + RRF + cross-encoder) sobre documentación de operaciones, con respuestas citadas."
+description = "Hybrid RAG (vector + BM25 + RRF + cross-encoder) for cited answers over operations documentation."
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
@@ -30,7 +30,7 @@ target-version = "py311"
 select = ["E", "F", "I", "B", "UP"]
 
 [tool.ruff.lint.per-file-ignores]
-# Corpus ficticio: textos largos en español que el formateador indenta.
+# Synthetic corpus source contains long strings formatted as data.
 "scripts/generate_docs.py" = ["E501"]
 
 [tool.ruff.lint.isort]

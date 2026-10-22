@@ -1,4 +1,4 @@
-"""Prompts versionados: plantillas YAML + Jinja2 con una versión activa por prompt."""
+"""Versioned prompts: YAML and Jinja2 templates with one active version."""
 
 from prompting.promptkit import Prompt, PromptKit, PromptNotFoundError
 

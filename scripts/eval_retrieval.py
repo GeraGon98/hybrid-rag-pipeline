@@ -1,12 +1,11 @@
-"""Compara estrategias de recuperación sobre `data/eval_questions.jsonl`.
+"""Compare retrieval strategies on `data/eval_questions.jsonl`.
 
-Imprime tablas Markdown listas para pegar en el README:
-1. recall@k, hit@k y MRR por estrategia (global y por tipo de pregunta).
-2. Calibración del umbral de relevancia: cuántas preguntas sin respuesta se rechazan y
-   cuántas con respuesta pasan, con los umbrales actuales.
-3. Con `--answers`, fidelidad de las citas generadas por el LLM (hace llamadas reales).
+Print Markdown tables ready for the README:
+1. recall@k, hit@k, and MRR by strategy, globally and by question type.
+2. Relevance-threshold calibration for answerable and unanswerable questions.
+3. With `--answers`, citation fidelity for LLM-generated answers (uses real API calls).
 
-Uso:
+Usage:
     uv run scripts/eval_retrieval.py --strategies vector bm25 hybrid hybrid_rerank --k 5
     uv run scripts/eval_retrieval.py --answers --answer-strategy hybrid_rerank
 """
@@ -68,7 +67,7 @@ def evaluate_strategy(
         if verbose:
             rr = reciprocal_rank(result.chunk_ids, q["expected_chunk_ids"])
             print(
-                f"  {strategy:<13} {q['id']} {q['kind']:<9} relevancia={result.relevance:.4f} "
+                f"  {strategy:<13} {q['id']} {q['kind']:<9} relevance={result.relevance:.4f} "
                 f"rr={rr:.2f} top={result.chunk_ids[:1]}"
             )
         if not q["expected_chunk_ids"]:
@@ -103,8 +102,8 @@ def evaluate_strategy(
 
 def print_retrieval_table(rows: list[dict], k: int) -> None:
     print(
-        f"\n| Estrategia | recall@{k} | hit@{k} | MRR | recall léxicas | recall semánticas "
-        f"| recall mixtas | latencia prom |"
+        f"\n| Strategy | recall@{k} | hit@{k} | MRR | lexical recall | semantic recall "
+        f"| mixed recall | avg latency |"
     )
     print("|---|---|---|---|---|---|---|---|")
     for r in rows:
@@ -118,12 +117,12 @@ def print_retrieval_table(rows: list[dict], k: int) -> None:
 
 def print_gate_table(rows: list[dict], thresholds: dict) -> None:
     print(
-        f"\nUmbrales: MIN_RELEVANCE={thresholds['reranker']} (reranker), "
-        f"MIN_VECTOR_SIMILARITY={thresholds['vector']} (coseno)\n"
+        f"\nThresholds: MIN_RELEVANCE={thresholds['reranker']} (reranker), "
+        f"MIN_VECTOR_SIMILARITY={thresholds['vector']} (cosine)\n"
     )
     print(
-        "| Estrategia | relevancia con respuesta (min-max) | relevancia sin respuesta (min-max) "
-        "| con respuesta que pasan | sin respuesta rechazadas |"
+        "| Strategy | answerable relevance (min-max) | unanswerable relevance (min-max) "
+        "| answerable passed | unanswerable rejected |"
     )
     print("|---|---|---|---|---|")
     for r in rows:
@@ -158,21 +157,21 @@ def evaluate_answers(assistant: RAGAssistant, questions: list[dict], strategy: s
             counts["cites_expected"] += bool(cited & expected)
         else:
             counts["rejected"] += not answer.encontrado
-        status = "encontrado" if answer.encontrado else "sin información"
-        print(f"  {q['id']} {status:<15} citas={sorted(cited) or '-'}")
+        status = "answered" if answer.encontrado else "no information"
+        print(f"  {q['id']} {status:<15} citations={sorted(cited) or '-'}")
     return {**counts, "cost_usd": cost}
 
 
 def print_answer_table(stats: dict, strategy: str) -> None:
     answerable, no_answer = stats.get("answerable", 0), stats.get("no_answer", 0)
-    print(f"\nFidelidad de respuestas con `{strategy}` (todas las citas pasaron el validador):\n")
-    print("| Métrica | Valor |")
+    print(f"\nAnswer fidelity with `{strategy}` (all citations passed validation):\n")
+    print("| Metric | Value |")
     print("|---|---|")
-    print(f"| Preguntas con respuesta contestadas | {stats.get('answered', 0)}/{answerable} |")
-    print(f"| ...que citan un chunk esperado | {stats.get('cites_expected', 0)}/{answerable} |")
-    print(f"| Preguntas sin respuesta rechazadas | {stats.get('rejected', 0)}/{no_answer} |")
-    print(f"| Errores (proveedor o validación agotada) | {stats.get('errors', 0)} |")
-    print(f"| Costo total | ${stats['cost_usd']:.5f} |")
+    print(f"| Answerable questions answered | {stats.get('answered', 0)}/{answerable} |")
+    print(f"| ...citing an expected chunk | {stats.get('cites_expected', 0)}/{answerable} |")
+    print(f"| Unanswerable questions rejected | {stats.get('rejected', 0)}/{no_answer} |")
+    print(f"| Errors (provider or exhausted validation) | {stats.get('errors', 0)} |")
+    print(f"| Total cost | ${stats['cost_usd']:.5f} |")
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -180,9 +179,9 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--strategies", nargs="+", choices=STRATEGIES, default=list(STRATEGIES))
     parser.add_argument("--k", type=int, default=5)
     parser.add_argument("--dataset", type=Path, default=DEFAULT_DATASET)
-    parser.add_argument("--answers", action="store_true", help="Evalúa también las respuestas.")
+    parser.add_argument("--answers", action="store_true", help="Also evaluate generated answers.")
     parser.add_argument("--answer-strategy", choices=STRATEGIES, default="hybrid_rerank")
-    parser.add_argument("--verbose", action="store_true", help="Detalle por pregunta.")
+    parser.add_argument("--verbose", action="store_true", help="Show per-question details.")
     return parser.parse_args(argv)
 
 
@@ -195,18 +194,18 @@ def main(argv: list[str] | None = None) -> int:
     try:
         retriever.search(
             questions[0]["question"], "vector", args.k
-        )  # Carga el modelo antes de medir.
+        )  # Load the model before measuring.
         rows = [
             evaluate_strategy(retriever, questions, strategy, args.k, thresholds, args.verbose)
             for strategy in args.strategies
         ]
         answerable = sum(1 for q in questions if q["expected_chunk_ids"])
-        print(f"{len(questions)} preguntas ({answerable} con respuesta) · k={args.k}")
+        print(f"{len(questions)} questions ({answerable} answerable) · k={args.k}")
         print_retrieval_table(rows, args.k)
         print_gate_table(rows, thresholds)
 
         if args.answers:
-            print(f"\nGenerando respuestas con {args.answer_strategy}...")
+            print(f"\nGenerating answers with {args.answer_strategy}...")
             client = LLMClient.from_settings(settings)
             assistant = RAGAssistant.from_settings(settings, retriever, client)
             stats = evaluate_answers(assistant, questions, args.answer_strategy)

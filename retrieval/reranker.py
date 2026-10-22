@@ -1,4 +1,4 @@
-"""Reordenamiento de candidatos con un cross-encoder."""
+"""Candidate reranking with a cross-encoder."""
 
 from __future__ import annotations
 
@@ -11,7 +11,7 @@ class Reranker:
         self.scorer = scorer
 
     def rerank(self, query: str, chunks: list[Chunk], k: int) -> list[tuple[Chunk, float]]:
-        """Los `k` chunks más relevantes según el cross-encoder, con score en 0-1."""
+        """Return the `k` most relevant chunks with cross-encoder scores in 0-1."""
         scores = self.scorer.score(query, [c.indexed_text for c in chunks])
         ranked = sorted(zip(chunks, scores, strict=True), key=lambda p: p[1], reverse=True)
         return ranked[:k]

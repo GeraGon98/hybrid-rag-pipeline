@@ -1,20 +1,24 @@
 ---
 id: POL-10
-titulo: Continuidad del negocio
-tipo: politica
-fecha: 2025-10-20
+title: Business Continuity
+type: policy
+date: '2025-10-20'
+section_slugs:
+  System Objectives: objetivos-por-sistema
+  Alternate Site: sitio-alterno
+  Drills: simulacros
 ---
 
-# POL-10 · Continuidad del negocio
+# POL-10 · Business Continuity
 
-## Objetivos por sistema
+## System Objectives
 
-ERP Orion: RTO 4 horas y RPO 15 minutos. WMS Atlas: RTO 2 horas y RPO 5 minutos. Correo: RTO 8 horas y RPO 1 hora.
+ERP Orion: RTO 4 hours and RPO 15 minutes. WMS Atlas: RTO 2 hours and RPO 5 minutes. Email: RTO 8 hours and RPO 1 hour.
 
-## Sitio alterno
+## Alternate Site
 
-El sitio alterno en la nube se activa por decisión del director de operaciones cuando se estima que el centro de datos estará fuera más de 6 horas.
+The alternate site in the cloud is activated at the discretion of the operations director when it is estimated that the data center will be unavailable for more than 6 hours.
 
-## Simulacros
+## Drills
 
-Se realiza un simulacro de continuidad cada semestre con participación de TI, operaciones y finanzas.
+A business continuity drill is conducted every semester with participation from IT, operations, and finance.

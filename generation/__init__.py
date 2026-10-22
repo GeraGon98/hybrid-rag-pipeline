@@ -1,4 +1,4 @@
-"""Generación: respuesta citada a partir de los chunks recuperados."""
+"""Generation: cited answers from retrieved chunks."""
 
 from generation.rag import NO_INFO, RAGAnswer, RAGAssistant
 

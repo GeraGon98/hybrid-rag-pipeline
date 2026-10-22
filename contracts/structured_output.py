@@ -1,4 +1,4 @@
-"""Salida estructurada: pedir JSON, validarlo con Pydantic y reparar si no cumple."""
+"""Structured output: request JSON, validate it with Pydantic, and repair failures."""
 
 from __future__ import annotations
 
@@ -14,34 +14,33 @@ if TYPE_CHECKING:
 
 T = TypeVar("T", bound=BaseModel)
 
-# Palabras clave que se quitan de la copia del schema que se envía al proveedor:
-# - maxLength, minLength y pattern: no todos los proveedores los aceptan en modo estricto;
-#   los aplica Pydantic al validar localmente.
-# - title y default: ruido para el modelo; `default` además choca con el modo estricto.
-# La validación local siempre usa el modelo completo, así que no se pierde ninguna regla.
+# Keywords removed from the schema copy sent to the provider:
+# - maxLength, minLength, and pattern: not every provider accepts them in strict mode;
+#   Pydantic enforces them during local validation.
+# - title and default: noise for the model; `default` also conflicts with strict mode.
+# Local validation always uses the complete model, so no rule is lost.
 UNSUPPORTED_KEYWORDS = frozenset({"maxLength", "minLength", "pattern", "title", "default"})
 
 _FENCE = re.compile(r"^```(?:json)?\s*(.*?)\s*```$", re.DOTALL)
 
 
 class StructuredOutputError(RuntimeError):
-    """El modelo no produjo una salida válida después de todas las reparaciones."""
+    """The model did not produce valid output after all repair attempts."""
 
     def __init__(self, schema_name: str, attempts: int, last_error: str) -> None:
         super().__init__(
-            f"No se obtuvo un {schema_name} válido después de {attempts} intento(s). "
-            f"Último error: {last_error}"
+            f"No valid {schema_name} was produced after {attempts} attempt(s). "
+            f"Last error: {last_error}"
         )
         self.attempts = attempts
         self.last_error = last_error
 
 
 def sanitize_schema(schema: dict, *, strict: bool = True) -> dict:
-    """Devuelve una copia del JSON Schema que aceptan los proveedores.
+    """Return a provider-compatible copy of the JSON Schema.
 
-    Quita `UNSUPPORTED_KEYWORDS` y resuelve `$ref`/`$defs` en línea. Con `strict=True`
-    además pone `additionalProperties: false` y marca todas las propiedades como
-    `required`, que es lo que exige el modo estricto.
+    Remove `UNSUPPORTED_KEYWORDS` and inline `$ref`/`$defs`. With `strict=True`, also
+    set `additionalProperties: false` and mark every property as `required`.
     """
     schema = copy.deepcopy(schema)
     defs = schema.pop("$defs", {})
@@ -56,7 +55,7 @@ def sanitize_schema(schema: dict, *, strict: bool = True) -> dict:
             return clean(copy.deepcopy(defs[name]))
         result = {k: clean(v) for k, v in node.items() if k not in UNSUPPORTED_KEYWORDS}
         if "properties" in node:
-            # `properties` es un mapa de nombres a schemas: sus llaves no son palabras clave.
+            # `properties` maps field names to schemas; its keys are not schema keywords.
             result["properties"] = {k: clean(v) for k, v in node["properties"].items()}
             if strict:
                 result["required"] = list(node["properties"])
@@ -68,22 +67,22 @@ def sanitize_schema(schema: dict, *, strict: bool = True) -> dict:
 
 def schema_instruction(schema: dict) -> str:
     return (
-        "Responde solo con un objeto JSON válido que cumpla este JSON Schema, sin texto "
-        "adicional ni bloques de código:\n" + json.dumps(schema, ensure_ascii=False)
+        "Respond only with a valid JSON object matching this JSON Schema. Do not include "
+        "additional text or code fences:\n" + json.dumps(schema, ensure_ascii=False)
     )
 
 
 def repair_message(error: ValidationError) -> str:
-    """Explica los errores de validación en un mensaje que el modelo pueda corregir."""
+    """Describe validation errors in a message the model can correct."""
     lines = []
     for err in error.errors():
-        where = ".".join(str(part) for part in err["loc"]) or "respuesta"
+        where = ".".join(str(part) for part in err["loc"]) or "response"
         message = err["msg"].removeprefix("Value error, ")
         lines.append(f"- {where}: {message}")
     return (
-        "Tu respuesta anterior no cumple el formato pedido. Errores:\n"
+        "Your previous response does not match the required format. Errors:\n"
         + "\n".join(lines)
-        + "\nResponde de nuevo solo con el JSON corregido."
+        + "\nRespond again with only the corrected JSON."
     )
 
 
@@ -112,14 +111,14 @@ def generate_structured(
     validation_context: dict | None = None,
     **params,
 ) -> T:
-    """Pide al modelo un `schema` y lo devuelve validado, reparando hasta `max_repairs` veces.
+    """Request `schema` from the model and return validated output, repairing failures.
 
-    La estrategia depende del primer proveedor de la cadena:
-    1. `json_schema` estricto si `supports_json_schema`.
-    2. `json_object` más el schema en el system si `supports_json_object`.
-    3. Solo el schema en el system.
-    `validation_context` llega a los validadores como `info.context` (por ejemplo, los
-    chunks recuperados para validar citas). Un error del proveedor no se repara: se propaga.
+    The strategy depends on the first provider in the chain:
+    1. Strict `json_schema` when `supports_json_schema`.
+    2. `json_object` plus the schema in the system message when `supports_json_object`.
+    3. The schema in the system message only.
+    Validators receive `validation_context` as `info.context` (for example, retrieved
+    chunks used to validate citations). Provider errors propagate without repair.
     """
     provider = client.providers[0]
     sent_schema = sanitize_schema(schema.model_json_schema())

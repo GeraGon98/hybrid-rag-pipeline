@@ -1,20 +1,24 @@
 ---
 id: SLA-A
-titulo: Telcom Express, enlace de internet secundario
-tipo: sla
-fecha: 2025-11-01
+title: Telcom Express, Secondary Internet Link
+type: sla
+date: '2025-11-01'
+section_slugs:
+  Service Scope: alcance-del-servicio
+  Availability: disponibilidad
+  Response Times: tiempos-de-atencion
 ---
 
-# SLA-A · Telcom Express, enlace de internet secundario
+# SLA-A · Telcom Express, Secondary Internet Link
 
-## Alcance del servicio
+## Service Scope
 
-Telcom Express provee un enlace de internet dedicado de 200 Mbps en el centro de datos, usado como respaldo del MPLS de NetLink.
+Telcom Express provides a dedicated 200 Mbps internet link at the data center, used as a backup for NetLink's MPLS.
 
-## Disponibilidad
+## Availability
 
-Disponibilidad mensual comprometida de 99.5 %. Las ventanas de mantenimiento se avisan con 5 días de anticipación.
+Monthly committed availability of 99.5 %. Maintenance windows are announced with 5 days' notice.
 
-## Tiempos de atención
+## Response Times
 
-Respuesta en 1 hora y resolución en 8 horas para fallas totales. Soporte telefónico 24x7 al 800-555-0199.
+Response within 1 hour and resolution within 8 hours for total outages. 24x7 telephone support at 800-555-0199.

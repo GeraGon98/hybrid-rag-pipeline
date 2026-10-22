@@ -1,13 +1,14 @@
-"""Carga de Markdown y PDF a documentos con metadatos.
+"""Load Markdown and PDF documents with metadata.
 
-- Markdown: front-matter YAML con `id`, `titulo`, `tipo` y `fecha`.
-- PDF: metadatos del archivo (`title`, `subject` = tipo, `keywords` = fecha) con respaldo
-  en el nombre del archivo y la primera línea. Los encabezados se reconstruyen como
-  Markdown (`#`, `##`, `###`) a partir del tamaño de fuente para que el chunker los use.
+- Markdown: YAML front matter with `id`, `title`, `type`, and `date`.
+- PDF: file metadata (`title`, `subject` = type, `keywords` = date), falling back to
+  the filename and first line. Headings are reconstructed as Markdown (`#`, `##`, `###`)
+  from font sizes for use by the chunker.
 """
 
 from __future__ import annotations
 
+import json
 import unicodedata
 from collections import Counter
 from dataclasses import dataclass
@@ -22,7 +23,7 @@ _HEADING_RATIO = 1.15
 
 
 class UnsupportedDocumentError(ValueError):
-    """El archivo no es Markdown ni PDF, o no se pudo leer."""
+    """The file is neither readable Markdown nor PDF."""
 
 
 @dataclass(frozen=True)
@@ -33,6 +34,7 @@ class Document:
     doc_type: str
     date: str | None
     text: str
+    section_slugs: dict[str, str] | None = None
 
 
 def load_document(path: Path) -> Document:
@@ -42,14 +44,14 @@ def load_document(path: Path) -> Document:
     if suffix == ".pdf":
         return _load_pdf(path)
     raise UnsupportedDocumentError(
-        f"{path.name}: formato no soportado ({suffix or 'sin extensión'})."
+        f"{path.name}: unsupported format ({suffix or 'no extension'})."
     )
 
 
 def load_directory(directory: Path) -> list[Document]:
-    """Carga todos los documentos soportados de una carpeta (recursivo), en orden estable."""
+    """Recursively load supported documents in stable order."""
     if not directory.is_dir():
-        raise FileNotFoundError(f"No existe la carpeta {directory}.")
+        raise FileNotFoundError(f"Directory does not exist: {directory}.")
     paths = sorted(p for p in directory.rglob("*") if p.suffix.lower() in SUPPORTED_SUFFIXES)
     return [load_document(p) for p in paths]
 
@@ -60,10 +62,15 @@ def _load_markdown(path: Path) -> Document:
     return Document(
         doc_id=str(meta.get("id") or path.stem),
         source=path.name,
-        title=str(meta.get("titulo") or _first_line(body) or path.stem),
-        doc_type=str(meta.get("tipo") or "documento"),
-        date=str(meta["fecha"]) if meta.get("fecha") else None,
+        title=str(meta.get("title") or meta.get("titulo") or _first_line(body) or path.stem),
+        doc_type=str(meta.get("type") or meta.get("tipo") or "document"),
+        date=(
+            str(meta.get("date") or meta.get("fecha"))
+            if meta.get("date") or meta.get("fecha")
+            else None
+        ),
         text=body.strip(),
+        section_slugs=dict(meta.get("section_slugs") or {}),
     )
 
 
@@ -72,10 +79,10 @@ def _split_front_matter(raw: str, path: Path) -> tuple[dict, str]:
         return {}, raw
     parts = raw.split(_FRONT_MATTER, 2)
     if len(parts) < 3:
-        raise UnsupportedDocumentError(f"{path.name}: front-matter sin cerrar.")
+        raise UnsupportedDocumentError(f"{path.name}: unclosed front matter.")
     meta = yaml.safe_load(parts[1]) or {}
     if not isinstance(meta, dict):
-        raise UnsupportedDocumentError(f"{path.name}: el front-matter no es un mapa YAML.")
+        raise UnsupportedDocumentError(f"{path.name}: front matter is not a YAML mapping.")
     return meta, parts[2]
 
 
@@ -83,7 +90,7 @@ def _load_pdf(path: Path) -> Document:
     try:
         pdf = pymupdf.open(path)
     except Exception as e:
-        raise UnsupportedDocumentError(f"{path.name}: no se pudo abrir el PDF ({e}).") from e
+        raise UnsupportedDocumentError(f"{path.name}: could not open PDF ({e}).") from e
     with pdf:
         meta = pdf.metadata or {}
         lines = [line for page in pdf for line in _page_lines(page)]
@@ -92,26 +99,38 @@ def _load_pdf(path: Path) -> Document:
         doc_id=path.stem,
         source=path.name,
         title=meta.get("title") or _first_line(text) or path.stem,
-        doc_type=meta.get("subject") or "documento",
+        doc_type=meta.get("subject") or "document",
         date=meta.get("keywords") or None,
         text=text,
+        section_slugs=_pdf_section_slugs(meta.get("producer") or ""),
     )
 
 
+def _pdf_section_slugs(producer: str) -> dict[str, str]:
+    prefix = "chunk-slugs:"
+    if not producer.startswith(prefix):
+        return {}
+    try:
+        value = json.loads(producer.removeprefix(prefix))
+    except (json.JSONDecodeError, TypeError):
+        return {}
+    return value if isinstance(value, dict) else {}
+
+
 def _page_lines(page) -> list[tuple[float, str]]:
-    """Líneas de la página como (tamaño de fuente máximo, texto)."""
+    """Return page lines as `(maximum font size, text)` pairs."""
     lines = []
     for block in page.get_text("dict")["blocks"]:
         for line in block.get("lines", []):
             text = "".join(span["text"] for span in line["spans"])
-            text = unicodedata.normalize("NFKC", text).strip()  # Ligaduras: "ﬁ" -> "fi".
+            text = unicodedata.normalize("NFKC", text).strip()  # Ligatures: "ﬁ" -> "fi".
             if text:
                 lines.append((max(span["size"] for span in line["spans"]), text))
     return lines
 
 
 def _lines_to_markdown(lines: list[tuple[float, str]]) -> str:
-    """Convierte líneas con tamaño de fuente en Markdown con encabezados y párrafos."""
+    """Convert font-sized lines into Markdown headings and paragraphs."""
     if not lines:
         return ""
     body_size = Counter(round(size, 1) for size, _ in lines).most_common(1)[0][0]
@@ -132,7 +151,7 @@ def _lines_to_markdown(lines: list[tuple[float, str]]) -> str:
     for size, text in lines:
         level = levels.get(round(size, 1))
         if level and level == last_level:
-            out[-1] = f"{out[-1]} {text}"  # Encabezado largo partido en varias líneas.
+            out[-1] = f"{out[-1]} {text}"  # Long heading split across multiple lines.
         elif level:
             flush()
             out.append(f"{'#' * level} {text}")

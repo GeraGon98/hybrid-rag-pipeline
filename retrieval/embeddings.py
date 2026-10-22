@@ -1,7 +1,7 @@
-"""Modelos de embeddings y de reranking detrás de protocolos pequeños.
+"""Embedding and reranking models behind small protocols.
 
-Los modelos de `sentence-transformers` se cargan la primera vez que se usan, no al
-importar: así `ask --strategy bm25` no paga la carga de modelos y los tests usan fakes.
+`sentence-transformers` models load on first use rather than at import time, so
+`ask --strategy bm25` avoids model startup and tests can use fakes.
 """
 
 from __future__ import annotations
@@ -20,14 +20,14 @@ class Embedder(Protocol):
 
 class PairScorer(Protocol):
     def score(self, query: str, texts: list[str]) -> list[float]:
-        """Relevancia de cada texto para la consulta, en 0-1."""
+        """Relevance of each text to the query, in the 0-1 range."""
         ...
 
 
 class SentenceTransformerEmbedder:
-    """Embeddings normalizados (coseno = producto punto).
+    """Normalized embeddings (cosine similarity equals dot product).
 
-    Los modelos E5 esperan los prefijos `query: ` y `passage: `; sin ellos la calidad cae.
+    E5 models expect `query: ` and `passage: ` prefixes; omitting them reduces quality.
     """
 
     def __init__(self, model_name: str, batch_size: int = 32) -> None:
@@ -85,6 +85,6 @@ class CrossEncoderScorer:
             [(query, text) for text in texts], batch_size=self.batch_size, show_progress_bar=False
         )
         scores = [float(value) for value in raw]
-        if any(s < 0 or s > 1 for s in scores):  # El modelo regresó logits.
+        if any(s < 0 or s > 1 for s in scores):  # The model returned logits.
             scores = [1 / (1 + math.exp(-s)) for s in scores]
         return scores

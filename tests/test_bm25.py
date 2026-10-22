@@ -7,8 +7,8 @@ from tests.conftest import SAMPLE_CHUNKS
 
 
 def test_tokenize_keeps_codes_and_removes_accents_and_stopwords():
-    assert tokenize("¿Qué es el ticket T-1042 de GW-VPN-02?") == ["ticket", "t-1042", "gw-vpn-02"]
-    assert tokenize("Resolución en 99.7 %") == ["resolucion", "99.7"]
+    assert tokenize("What is ticket T-1042 for GW-VPN-02?") == ["ticket", "t-1042", "gw-vpn-02"]
+    assert tokenize("Resolution at 99.7%") == ["resolution", "99.7"]
 
 
 def test_code_query_finds_exact_chunk():
@@ -21,7 +21,7 @@ def test_code_query_finds_exact_chunk():
 def test_only_positive_scores_are_returned():
     index = BM25Index(SAMPLE_CHUNKS)
     assert index.search("kubernetes", k=3) == []
-    assert index.search("¿qué es?", k=3) == []
+    assert index.search("what is?", k=3) == []
 
 
 def test_empty_index_rejected():

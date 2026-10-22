@@ -1,0 +1,775 @@
+{
+  "documents": [
+    {
+      "id": "RB-01",
+      "title": "Orion ERP Outage",
+      "type": "runbook",
+      "date": "2026-01-15",
+      "sections": [
+        {
+          "heading": "Symptoms",
+          "body": "Users receive the ORN-503 error when logging into Orion ERP or order screens hang for more than 60 seconds. The Zabbix monitor triggers the ERP-HEALTH alert in red.",
+          "slug": "sintomas"
+        },
+        {
+          "heading": "Diagnosis",
+          "body": "Check the status of the orion-app service on the erp-app-01 and erp-app-02 nodes with systemctl status orion-app. Review the database connection pool: if it exceeds 180 out of 200 connections, the bottleneck is the database and not the application.",
+          "slug": "diagnostico"
+        },
+        {
+          "heading": "Recovery",
+          "body": "Restart the node with the highest memory usage first, never both at the same time. If the error persists after two restarts, activate contingency mode: orders are captured in the backup sheet and loaded with the ORN-IMPORT job upon service restoration.",
+          "slug": "recuperacion"
+        },
+        {
+          "heading": "Scaling",
+          "body": "If the outage lasts more than 30 minutes, a P1 incident is declared and a case is opened with OrionSoft according to the SLA-D. The on-call manager notifies sales and the distribution centers.",
+          "slug": "escalamiento"
+        }
+      ]
+    },
+    {
+      "id": "RB-02",
+      "title": "Primary MPLS Link Failure",
+      "type": "runbook",
+      "date": "2026-02-03",
+      "sections": [
+        {
+          "heading": "Symptoms",
+          "body": "Branch offices lose access to ERP and WMS simultaneously, while local internet remains functional. The border router rt-core-01 shows the interface Gi0/1 in a down state.",
+          "slug": "sintomas"
+        },
+        {
+          "heading": "Diagnosis",
+          "body": "Ping the NetLink gateway at 10.20.0.1 and execute traceroute from rt-core-01. If the last responding hop is the provider's equipment, the failure is on NetLink's side.",
+          "slug": "diagnostico"
+        },
+        {
+          "heading": "Switch to Secondary Link",
+          "body": "Traffic reroutes through the IPsec tunnel over Telcom Express internet link (SLA-A). The switch occurs automatically via BGP within less than 3 minutes; if it does not occur, manually lower the MPLS route priority using the command documented in the network appendix.",
+          "slug": "conmutacion-al-enlace-secundario"
+        },
+        {
+          "heading": "Report to Provider",
+          "body": "Open a ticket with NetLink at 800-555-0142 indicating the MPLS circuit ID MPLS-NL-7781. The SLA-B contract obliges NetLink to respond within 30 minutes for total outages.",
+          "slug": "reporte-al-proveedor"
+        }
+      ]
+    },
+    {
+      "id": "RB-03",
+      "title": "WMS Atlas Restart",
+      "type": "runbook",
+      "date": "2026-01-28",
+      "sections": [
+        {
+          "heading": "When to Apply",
+          "body": "Use this procedure when dockside radio-frequency terminals cannot confirm picks or Atlas WMS takes more than 10 seconds to respond to a scan.",
+          "slug": "cuando-aplicar"
+        },
+        {
+          "heading": "Procedure",
+          "body": "Notify shift supervisors to pause picking. Stop the atlas-core service, clear the message queue with purge_queue.sh, and restart it. A full restart takes approximately 7 minutes.",
+          "slug": "procedimiento"
+        },
+        {
+          "heading": "Validation",
+          "body": "Confirm that the pending task queue returns to zero and perform a test scan at platform 1. Record the start and end times in the ticket.",
+          "slug": "validacion"
+        }
+      ]
+    },
+    {
+      "id": "RB-04",
+      "title": "Invoice Database Restoration",
+      "type": "runbook",
+      "date": "2026-02-20",
+      "sections": [
+        {
+          "heading": "Scope",
+          "body": "Applies to the PostgreSQL database db-fact-01 that stores electronic invoices and credit notes.",
+          "slug": "alcance"
+        },
+        {
+          "heading": "Available Backups",
+          "body": "There is a full daily backup at 02:00 and WAL archiving every 5 minutes in CloudVault (SLA-I). This allows recovery to a point-in-time with a maximum data loss of 5 minutes.",
+          "slug": "respaldos-disponibles"
+        },
+        {
+          "heading": "Restoration Procedure",
+          "body": "Restore the latest full backup to a clean server, apply the WALs up to the desired time using recovery_target_time, and validate invoice counts against the SAT portal before redirecting the application.",
+          "slug": "procedimiento-de-restauracion"
+        },
+        {
+          "heading": "Authorization",
+          "body": "All production restorations require approval from the finance leader and an emergency change registered according to POL-03.",
+          "slug": "autorizacion"
+        }
+      ]
+    },
+    {
+      "id": "RB-05",
+      "title": "Compromised Account or Phishing",
+      "type": "runbook",
+      "date": "2026-03-02",
+      "sections": [
+        {
+          "heading": "Indicators",
+          "body": "A user reports a suspicious email in which they entered their password, or the email system detects login attempts from another country.",
+          "slug": "senales"
+        },
+        {
+          "heading": "Immediate Containment",
+          "body": "Disable the account, revoke all active sessions, and enforce password and second factor reset. Block the malicious email sender and domain in the filter.",
+          "slug": "contencion-inmediata"
+        },
+        {
+          "heading": "Investigation",
+          "body": "Review forwarding rules created in the mailbox, access logs from the last 14 days, and shared file downloads. Preserve evidence in the incident folder.",
+          "slug": "investigacion"
+        },
+        {
+          "heading": "Notification",
+          "body": "If there was access to information classified as Confidential according to POL-08, the security officer notifies the address within a maximum of 24 hours.",
+          "slug": "notificacion"
+        }
+      ]
+    },
+    {
+      "id": "RB-06",
+      "title": "Label Printer Failures on Platforms",
+      "type": "runbook",
+      "date": "2026-01-09",
+      "sections": [
+        {
+          "heading": "Symptoms",
+          "body": "Zebra ZT411 thermal printers print labels in white, misaligned, or do not receive jobs from the WMS.",
+          "slug": "sintomas"
+        },
+        {
+          "heading": "Quick Fix",
+          "body": "Recalibrate the media sensor by holding down the pause and cancel buttons for 2 seconds. If printing in white, check that the roll is thermal transfer and not direct thermal.",
+          "slug": "solucion-rapida"
+        },
+        {
+          "heading": "Print Queue",
+          "body": "If jobs are not arriving, check the PRN-ANDEN print queue on the print server and restart the spooler service. Replacement printers are located in the IT warehouse, shelf 4.",
+          "slug": "cola-de-impresion"
+        }
+      ]
+    },
+    {
+      "id": "RB-07",
+      "title": "Inventory Desynchronization Between WMS and ERP",
+      "type": "runbook",
+      "date": "2026-03-10",
+      "sections": [
+        {
+          "heading": "Problem Description",
+          "body": "The available inventory in ERP Orion does not match the stock levels in WMS Atlas. This is a known issue registered as T-1042 and typically appears after month-end closures with high volume.",
+          "slug": "descripcion-del-problema"
+        },
+        {
+          "heading": "Known Root Cause",
+          "body": "The INV-SYNC interface job stops processing when it receives an SKU with more than 18 characters and stops processing subsequent movements without marking an error.",
+          "slug": "causa-raiz-conocida"
+        },
+        {
+          "heading": "Resolution",
+          "body": "Identify the problematic SKU in the INV-SYNC log, correct it in the item master, and restart the job with the --desde-ultimo-ok option. Then run the reconciliation report CONC-02 to confirm that the differences are zero.",
+          "slug": "correccion"
+        },
+        {
+          "heading": "Prevention",
+          "body": "Since March 2026, the item master validates the SKU length. The ticket T-1042 remains open until the vendor releases the definitive patch.",
+          "slug": "prevencion"
+        }
+      ]
+    },
+    {
+      "id": "RB-08",
+      "title": "TLS Certificate Renewal",
+      "type": "runbook",
+      "date": "2026-02-11",
+      "sections": [
+        {
+          "heading": "Alerts",
+          "body": "Monitoring alerts 30 days prior to the expiration of any public certificate and re-alerts with priority P2 7 days before expiration.",
+          "slug": "alertas"
+        },
+        {
+          "heading": "Renewal",
+          "body": "Customer portal certificates are issued by DigiCert using the corporate account. Generate the CSR with a minimum RSA key size of 2048 bits and upload it to the provider's portal.",
+          "slug": "renovacion"
+        },
+        {
+          "heading": "Installation",
+          "body": "Install the certificate and intermediate chain on the load balancer lb-ext-01 and verify with an external SSL test that the rating is A or higher.",
+          "slug": "instalacion"
+        }
+      ]
+    },
+    {
+      "id": "RB-09",
+      "title": "Full Disk on Application Servers",
+      "type": "runbook",
+      "date": "2026-01-21",
+      "sections": [
+        {
+          "heading": "Thresholds",
+          "body": "An alert is triggered at 80% disk usage and is considered critical at 90%.",
+          "slug": "umbrales"
+        },
+        {
+          "heading": "Safe Cleanup",
+          "body": "Compress and move logs older than 7 days from /var/log/apps to cold storage. Never delete files from /data/spool as they contain pending transactions to be sent.",
+          "slug": "limpieza-segura"
+        },
+        {
+          "heading": "Expansion",
+          "body": "If disk usage remains above 80% after cleanup, request volume expansion from the infrastructure team using a standard change process.",
+          "slug": "ampliacion"
+        }
+      ]
+    },
+    {
+      "id": "RB-10",
+      "title": "Remote Access VPN Failure",
+      "type": "runbook",
+      "date": "2026-02-26",
+      "sections": [
+        {
+          "heading": "Symptoms",
+          "body": "Remote users are unable to connect to the GW-VPN-02 concentrator or are disconnected every few minutes.",
+          "slug": "sintomas"
+        },
+        {
+          "heading": "Diagnosis",
+          "body": "Check if the number of active tunnels has reached the 250 simultaneous user license limit and if the VPN portal certificate is still valid.",
+          "slug": "diagnostico"
+        },
+        {
+          "heading": "Temporary Solution",
+          "body": "Enable the alternate concentrator GW-VPN-03 and inform users of the alternate address vpn2.operadora.example. Prioritize access for finance and the service desk.",
+          "slug": "solucion-temporal"
+        }
+      ]
+    },
+    {
+      "id": "RB-11",
+      "title": "Power Outage at the Data Center",
+      "type": "runbook",
+      "date": "2026-03-05",
+      "sections": [
+        {
+          "heading": "Initial Response",
+          "body": "Upon detecting the outage, the UPS supports the load for up to 15 minutes. The diesel generator must start automatically within less than 30 seconds; if it fails to start, the on-site DataCenter Monterrey technician must manually ignite it.",
+          "slug": "respuesta-inicial"
+        },
+        {
+          "heading": "Ordered Shutdown",
+          "body": "If the generator is unavailable and the UPS drops below 40% load, shut down the test environments first, followed by applications, and finally the databases.",
+          "slug": "apagado-ordenado"
+        },
+        {
+          "heading": "Recovery",
+          "body": "Upon restoring power, power up in reverse order: storage, databases, applications, and finally user services. Validate the integrity of the databases before resuming operations.",
+          "slug": "recuperacion"
+        }
+      ]
+    },
+    {
+      "id": "RB-12",
+      "title": "Onboarding Access for New Staff",
+      "type": "runbook",
+      "date": "2026-01-05",
+      "sections": [
+        {
+          "heading": "Request",
+          "body": "Human Resources sends the ALTA-01 form at least 3 business days in advance of the start date.",
+          "slug": "solicitud"
+        },
+        {
+          "heading": "Base Access",
+          "body": "Every employee receives email, VPN, and read-only access to the documentation portal. Role-based Orion ERP access requires approval from the employee's manager.",
+          "slug": "accesos-base"
+        },
+        {
+          "heading": "Delivery",
+          "body": "The service desk delivers credentials in person or via call, never by email. The user must activate MFA on the first day according to POL-02.",
+          "slug": "entrega"
+        }
+      ]
+    },
+    {
+      "id": "SLA-A",
+      "title": "Telcom Express, Secondary Internet Link",
+      "type": "sla",
+      "date": "2025-11-01",
+      "sections": [
+        {
+          "heading": "Service Scope",
+          "body": "Telcom Express provides a dedicated 200 Mbps internet link at the data center, used as a backup for NetLink's MPLS.",
+          "slug": "alcance-del-servicio"
+        },
+        {
+          "heading": "Availability",
+          "body": "Monthly committed availability of 99.5 %. Maintenance windows are announced with 5 days' notice.",
+          "slug": "disponibilidad"
+        },
+        {
+          "heading": "Response Times",
+          "body": "Response within 1 hour and resolution within 8 hours for total outages. 24x7 telephone support at 800-555-0199.",
+          "slug": "tiempos-de-atencion"
+        }
+      ]
+    },
+    {
+      "id": "SLA-B",
+      "title": "NetLink, MPLS Links",
+      "type": "sla",
+      "date": "2025-10-15",
+      "sections": [
+        {
+          "heading": "Service Scope",
+          "body": "NetLink provides the MPLS network connecting the data center to 14 branch offices and 3 distribution centers.",
+          "slug": "alcance-del-servicio"
+        },
+        {
+          "heading": "Availability",
+          "body": "Monthly committed availability of 99.7 % per circuit, measured by the provider's monitoring and validated against ours.",
+          "slug": "disponibilidad"
+        },
+        {
+          "heading": "Response and Resolution Times",
+          "body": "Complete failure: response within 30 minutes and resolution within 4 hours. Degradation: response within 2 hours and resolution within 12 hours.",
+          "slug": "tiempos-de-respuesta-y-resolucion"
+        },
+        {
+          "heading": "Penalties",
+          "body": "For each full hour exceeding the resolution time, 5 % of the monthly rental for the circuit is deducted, with a maximum of 30 %. The claim must be made within 15 natural days following the end of the month.",
+          "slug": "penalizaciones"
+        }
+      ]
+    },
+    {
+      "id": "SLA-C",
+      "title": "DataCenter Monterrey, colocation",
+      "type": "sla",
+      "date": "2025-09-01",
+      "sections": [
+        {
+          "heading": "Infrastructure",
+          "body": "Two 42U racks with redundant power A+B, UPS, and generator with 48 hours of diesel autonomy.",
+          "slug": "infraestructura"
+        },
+        {
+          "heading": "Physical Access",
+          "body": "Physical access requires prior registration in the provider's portal with 24 hours advance notice; for emergencies, the on-call manager may authorize via phone.",
+          "slug": "acceso-fisico"
+        },
+        {
+          "heading": "Commitments",
+          "body": "99.98 % energy availability. Cold aisle temperature between 18 and 27 degrees. On-site technician with 15 minute response time for remote hands.",
+          "slug": "compromisos"
+        }
+      ]
+    },
+    {
+      "id": "SLA-D",
+      "title": "OrionSoft, Orion ERP Support",
+      "type": "sla",
+      "date": "2025-12-01",
+      "sections": [
+        {
+          "heading": "Coverage",
+          "body": "Application and database support for the Orion ERP; includes patches and minor updates.",
+          "slug": "cobertura"
+        },
+        {
+          "heading": "Priorities and Response Times",
+          "body": "P1: Response within 1 hour, 24x7. P2: Response within 4 business hours. P3 and P4: Next business day.",
+          "slug": "prioridades-y-tiempos"
+        },
+        {
+          "heading": "Contact Channel",
+          "body": "Cases are opened via the support.orionsoft.example portal with the customer number OR-55120. P1 cases are also confirmed by phone.",
+          "slug": "canal-de-contacto"
+        }
+      ]
+    },
+    {
+      "id": "SLA-E",
+      "title": "HelpDesk Plus, External Support Desk",
+      "type": "sla",
+      "date": "2025-08-20",
+      "sections": [
+        {
+          "heading": "Hours",
+          "body": "Support available Monday to Saturday from 7:00 to 22:00. Calls outside of these hours are routed to the on-call internal engineer.",
+          "slug": "horario"
+        },
+        {
+          "heading": "Metrics",
+          "body": "First Contact Resolution in at least 70 % of cases and minimum satisfaction of 4.2 out of 5 in the monthly survey.",
+          "slug": "metricas"
+        },
+        {
+          "heading": "Scope",
+          "body": "Password reset, device configuration, office printers, and user onboarding. Does not handle server or network failures.",
+          "slug": "alcance"
+        }
+      ]
+    },
+    {
+      "id": "SLA-F",
+      "title": "MontaServ, elevator maintenance",
+      "type": "sla",
+      "date": "2025-07-01",
+      "sections": [
+        {
+          "heading": "Preventive Maintenance",
+          "body": "Each elevator receives preventive service every 250 hours of operation or every 3 months, whichever occurs first.",
+          "slug": "mantenimiento-preventivo"
+        },
+        {
+          "heading": "Failures",
+          "body": "For a stopped elevator, MontaServ must arrive within 4 hours in metropolitan areas and 8 hours in remote locations. If the repair exceeds 48 hours, a replacement unit must be provided.",
+          "slug": "fallas"
+        },
+        {
+          "heading": "Penalties",
+          "body": "Each day without replacement after 48 hours incurs a penalty of 2,000 MXN per unit.",
+          "slug": "penalizaciones"
+        }
+      ]
+    },
+    {
+      "id": "SLA-G",
+      "title": "RutaVeloz, last-mile delivery",
+      "type": "sla",
+      "date": "2025-10-01",
+      "sections": [
+        {
+          "heading": "Delivery Times",
+          "body": "Local deliveries within 24 hours and out-of-area deliveries within 48 hours from pickup at the distribution center.",
+          "slug": "tiempos-de-entrega"
+        },
+        {
+          "heading": "Metrics",
+          "body": "On-time delivery rate of at least 95 % monthly and damage rate below 0.5 % of packages.",
+          "slug": "indicadores"
+        },
+        {
+          "heading": "Non-Compliance",
+          "body": "If the on-time delivery rate drops below 95 % for two consecutive months, a contract review is triggered according to POL-09.",
+          "slug": "incumplimiento"
+        }
+      ]
+    },
+    {
+      "id": "SLA-H",
+      "title": "VigiPro, Physical Security",
+      "type": "sla",
+      "date": "2025-06-15",
+      "sections": [
+        {
+          "heading": "Coverage",
+          "body": "24x7 guards at the three distribution centers and patrols every 2 hours in the trailer parking lot.",
+          "slug": "cobertura"
+        },
+        {
+          "heading": "Access Control",
+          "body": "All visitors register with official identification and receive a temporary badge. Carriers wait in the booth until the assigned dock is available.",
+          "slug": "control-de-accesos"
+        },
+        {
+          "heading": "Incident Reporting",
+          "body": "VigiPro provides a written report of any incident within less than 2 hours and a monthly summary with statistics.",
+          "slug": "reporte-de-incidentes"
+        }
+      ]
+    },
+    {
+      "id": "SLA-I",
+      "title": "CloudVault, Cloud Backups",
+      "type": "sla",
+      "date": "2025-11-20",
+      "sections": [
+        {
+          "heading": "Service",
+          "body": "Encrypted backup storage using AES-256 across two distinct geographic regions.",
+          "slug": "servicio"
+        },
+        {
+          "heading": "Retention",
+          "body": "Daily backups are retained for 35 days and monthly backups for 12 months, aligned with POL-05.",
+          "slug": "retencion"
+        },
+        {
+          "heading": "Restoration",
+          "body": "Backup download initiation time less than 1 hour. Quarterly restoration tests with signed evidence from both parties.",
+          "slug": "restauracion"
+        }
+      ]
+    },
+    {
+      "id": "POL-01",
+      "title": "Incident Management",
+      "type": "policy",
+      "date": "2025-09-15",
+      "sections": [
+        {
+          "heading": "Priorities",
+          "body": "P1: Operation halted at one or more distribution centers or critical system down. P2: Severe degradation with manual alternative. P3: Affects a user or area without halting operation. P4: Requests and inquiries.",
+          "slug": "prioridades"
+        },
+        {
+          "heading": "Internal Target Times",
+          "body": "P1 response within 15 minutes and status communication every 30 minutes. P2 within 1 hour. P3 within 8 business hours.",
+          "slug": "tiempos-objetivo-internos"
+        },
+        {
+          "heading": "Roles",
+          "body": "Each P1 has an Incident Coordinator who leads the call and a Business Communication Owner. Neither of the two may execute technical changes.",
+          "slug": "roles"
+        },
+        {
+          "heading": "Closure",
+          "body": "An P1 or P2 incident closes only when the user confirms service restoration and the postmortem is scheduled according to POL-11.",
+          "slug": "cierre"
+        }
+      ]
+    },
+    {
+      "id": "POL-02",
+      "title": "Passwords and MFA",
+      "type": "policy",
+      "date": "2025-08-01",
+      "sections": [
+        {
+          "heading": "Password Requirements",
+          "body": "Minimum 14 characters, no periodic expiration unless suspected compromise. The account is locked for 15 minutes after 10 failed attempts.",
+          "slug": "requisitos-de-contrasena"
+        },
+        {
+          "heading": "Second Factor",
+          "body": "MFA is required for email, VPN, ERP Orion, and administration consoles. Authenticator app or physical key are accepted; SMS is not permitted.",
+          "slug": "segundo-factor"
+        },
+        {
+          "heading": "Service Accounts",
+          "body": "Service accounts use 32-character passwords stored in the secret vault and are rotated every 180 days.",
+          "slug": "cuentas-de-servicio"
+        }
+      ]
+    },
+    {
+      "id": "POL-03",
+      "title": "Change Management",
+      "type": "policy",
+      "date": "2025-10-10",
+      "sections": [
+        {
+          "heading": "Change Types",
+          "body": "Standard: pre-approved and low-risk. Normal: requires CAB committee approval. Emergency: approved by the on-call manager and documented within the following 48 hours.",
+          "slug": "tipos-de-cambio"
+        },
+        {
+          "heading": "Maintenance Windows",
+          "body": "Normal changes are executed on Tuesdays and Thursdays from 23:00 to 03:00. No changes are allowed from the 28th to the 3rd of each month due to the closing period.",
+          "slug": "ventanas-de-mantenimiento"
+        },
+        {
+          "heading": "CAB Committee",
+          "body": "The CAB meets every Monday at 10:00. Requests must be registered before Friday at 14:00 with a proven rollback plan.",
+          "slug": "comite-cab"
+        }
+      ]
+    },
+    {
+      "id": "POL-04",
+      "title": "On-Call Shifts",
+      "type": "policy",
+      "date": "2025-07-20",
+      "sections": [
+        {
+          "heading": "Rotation",
+          "body": "Shifts are weekly, from Monday 09:00 to Monday 09:00, with a primary and a secondary engineer.",
+          "slug": "rotacion"
+        },
+        {
+          "heading": "Response Times",
+          "body": "The primary must acknowledge the alert within 10 minutes. If not, the platform automatically escalates to the secondary and then to the on-call manager.",
+          "slug": "tiempos-de-reaccion"
+        },
+        {
+          "heading": "Compensation",
+          "body": "Each week of on-call duty is compensated with a fixed bonus equivalent to 2 days of salary, plus overtime for interventions outside of working hours exceeding 30 minutes. A day off is granted after a night shift with more than 3 hours of work.",
+          "slug": "compensacion"
+        }
+      ]
+    },
+    {
+      "id": "POL-05",
+      "title": "Backup Retention",
+      "type": "policy",
+      "date": "2025-09-01",
+      "sections": [
+        {
+          "heading": "Retention Periods",
+          "body": "Daily: 35 days. Monthly: 12 months. Annual fiscal information: 5 years.",
+          "slug": "periodos-de-retencion"
+        },
+        {
+          "heading": "Testing",
+          "body": "At least one critical system is restored quarterly in an isolated environment, and the real-time recovery time is documented.",
+          "slug": "pruebas"
+        },
+        {
+          "heading": "Responsibilities",
+          "body": "The infrastructure team operates the backups; the owner of each system validates the restoration test.",
+          "slug": "responsables"
+        }
+      ]
+    },
+    {
+      "id": "POL-06",
+      "title": "Acceptable Use of Equipment",
+      "type": "policy",
+      "date": "2025-06-01",
+      "sections": [
+        {
+          "heading": "Assigned Equipment",
+          "body": "Laptops are company property and are delivered with full disk encryption. It is prohibited to install unlicensed software or disable the antivirus.",
+          "slug": "equipos-asignados"
+        },
+        {
+          "heading": "Personal Use",
+          "body": "Reasonable personal use is permitted as long as it does not interfere with operations or involve storing company information in personal cloud services.",
+          "slug": "uso-personal"
+        },
+        {
+          "heading": "Loss or Theft",
+          "body": "Report loss or theft to the service desk within less than 4 hours to remotely lock and wipe the device.",
+          "slug": "perdida-o-robo"
+        }
+      ]
+    },
+    {
+      "id": "POL-07",
+      "title": "Field Technician Allowances",
+      "type": "policy",
+      "date": "2025-12-15",
+      "sections": [
+        {
+          "heading": "Amounts",
+          "body": "Meals up to 650 MXN per day in metropolitan areas and 900 MXN for out-of-town travel. Accommodation up to 1,800 MXN per night.",
+          "slug": "montos"
+        },
+        {
+          "heading": "Reimbursement",
+          "body": "Expenses are reimbursed with an electronic invoice in the company's name within 5 business days following return.",
+          "slug": "comprobacion"
+        },
+        {
+          "heading": "Exceptions",
+          "body": "Expenses exceeding the limit require prior approval from the operations manager via email.",
+          "slug": "excepciones"
+        }
+      ]
+    },
+    {
+      "id": "POL-08",
+      "title": "Information Classification",
+      "type": "policy",
+      "date": "2025-05-10",
+      "sections": [
+        {
+          "heading": "Levels",
+          "body": "Public, Internal, Confidential, and Restricted. Contracts with vendors and customer data are Confidential; payroll and cryptographic keys are Restricted.",
+          "slug": "niveles"
+        },
+        {
+          "heading": "Handling",
+          "body": "Confidential information is shared only with corporate accounts and never on unencrypted USB drives. Restricted information requires approval from the information owner for each access.",
+          "slug": "manejo"
+        },
+        {
+          "heading": "Labeling",
+          "body": "All Confidential or Restricted documents carry the level label in the header.",
+          "slug": "etiquetado"
+        }
+      ]
+    },
+    {
+      "id": "POL-09",
+      "title": "Vendor Management",
+      "type": "policy",
+      "date": "2025-11-05",
+      "sections": [
+        {
+          "heading": "Quarterly Evaluation",
+          "body": "Each critical vendor is evaluated quarterly on a 1-to-5 scale for SLA compliance, quality, and communication.",
+          "slug": "evaluacion-trimestral"
+        },
+        {
+          "heading": "Critical Vendors",
+          "body": "The following are considered critical: NetLink, OrionSoft, DataCenter Monterrey, CloudVault, and RutaVeloz.",
+          "slug": "proveedores-criticos"
+        },
+        {
+          "heading": "Improvement Plan",
+          "body": "A rating below 3 requires a 60-day improvement plan. Two consecutive quarters below 3 trigger a search for an alternative vendor.",
+          "slug": "plan-de-mejora"
+        }
+      ]
+    },
+    {
+      "id": "POL-10",
+      "title": "Business Continuity",
+      "type": "policy",
+      "date": "2025-10-20",
+      "sections": [
+        {
+          "heading": "System Objectives",
+          "body": "ERP Orion: RTO 4 hours and RPO 15 minutes. WMS Atlas: RTO 2 hours and RPO 5 minutes. Email: RTO 8 hours and RPO 1 hour.",
+          "slug": "objetivos-por-sistema"
+        },
+        {
+          "heading": "Alternate Site",
+          "body": "The alternate site in the cloud is activated at the discretion of the operations director when it is estimated that the data center will be unavailable for more than 6 hours.",
+          "slug": "sitio-alterno"
+        },
+        {
+          "heading": "Drills",
+          "body": "A business continuity drill is conducted every semester with participation from IT, operations, and finance.",
+          "slug": "simulacros"
+        }
+      ]
+    },
+    {
+      "id": "POL-11",
+      "title": "Postmortems",
+      "type": "policy",
+      "date": "2025-09-25",
+      "sections": [
+        {
+          "heading": "When Required",
+          "body": "All P1 incidents and all P2 incidents lasting more than 4 hours require a postmortem.",
+          "slug": "cuando-se-requiere"
+        },
+        {
+          "heading": "Timeline and Format",
+          "body": "The document is published within a maximum of 5 business days and includes timeline, root cause, impact, and corrective actions with responsible party and due date.",
+          "slug": "plazo-y-formato"
+        },
+        {
+          "heading": "Blameless Focus",
+          "body": "The analysis focuses on processes and systems, not on individuals. Corrective actions are reviewed during the weekly operations meeting until closure.",
+          "slug": "enfoque-sin-culpables"
+        }
+      ]
+    }
+  ]
+}

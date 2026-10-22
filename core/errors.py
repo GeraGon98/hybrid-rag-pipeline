@@ -1,14 +1,13 @@
-"""Jerarquía de errores de proveedores.
+"""Provider error hierarchy.
 
-La distinción entre errores transitorios y permanentes decide qué hace el cliente:
-los transitorios se reintentan; los permanentes saltan directo al siguiente proveedor.
+Transient errors are retried; permanent errors immediately advance to the next provider.
 """
 
 from __future__ import annotations
 
 
 class ProviderError(Exception):
-    """Error base de cualquier proveedor de LLM."""
+    """Base error for any LLM provider."""
 
     def __init__(self, provider: str, message: str, status_code: int | None = None) -> None:
         super().__init__(message)
@@ -21,17 +20,17 @@ class ProviderError(Exception):
 
 
 class TransientProviderError(ProviderError):
-    """Error que puede desaparecer si se reintenta: 429, 500, 502, 503, 504, timeouts y red."""
+    """Retryable error: 429, 500, 502, 503, 504, timeouts, and network failures."""
 
 
 class PermanentProviderError(ProviderError):
-    """Error que no se arregla reintentando: llave inválida, request mal formada, etc."""
+    """Non-retryable error such as an invalid key or malformed request."""
 
 
 class AllProvidersFailedError(Exception):
-    """Todos los proveedores de la cadena fallaron (o ninguno soporta lo que pide la request)."""
+    """All providers failed, or none supports the requested capability."""
 
     def __init__(self, errors: list[ProviderError], reason: str | None = None) -> None:
         self.errors = errors
-        detail = "; ".join(f"{type(e).__name__} {e}" for e in errors) or reason or "sin proveedores"
-        super().__init__(f"Todos los proveedores fallaron: {detail}")
+        detail = "; ".join(f"{type(e).__name__} {e}" for e in errors) or reason or "no providers"
+        super().__init__(f"All providers failed: {detail}")

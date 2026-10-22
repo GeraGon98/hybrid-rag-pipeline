@@ -6,16 +6,16 @@ from pydantic import ValidationError
 from contracts.answer import RespuestaConCitas, normalize
 
 CHUNKS = {
-    "SLA-B#tiempos": "Falla total: respuesta en 30 minutos y resolución en 4 horas.",
-    "SLA-B#disponibilidad": "Disponibilidad mensual comprometida de 99.7 % por circuito.",
+    "SLA-B#tiempos": "Total outage: response within 30 minutes and resolution within 4 hours.",
+    "SLA-B#disponibilidad": "Committed monthly availability of 99.7% per circuit.",
 }
 
 
 def answer(**overrides) -> dict:
     data = {
         "encontrado": True,
-        "respuesta": "NetLink responde en 30 minutos.",
-        "citas": [{"chunk_id": "SLA-B#tiempos", "fragmento": "respuesta en 30 minutos"}],
+        "respuesta": "NetLink responds within 30 minutes.",
+        "citas": [{"chunk_id": "SLA-B#tiempos", "fragmento": "response within 30 minutes"}],
     }
     data.update(overrides)
     return data
@@ -31,37 +31,37 @@ def test_valid_citation():
 
 
 def test_citation_outside_context_is_rejected():
-    data = answer(citas=[{"chunk_id": "RB-01#sintomas", "fragmento": "respuesta en 30 minutos"}])
-    with pytest.raises(ValidationError, match="no está en el contexto"):
+    data = answer(citas=[{"chunk_id": "RB-01#sintomas", "fragmento": "response within 30 minutes"}])
+    with pytest.raises(ValidationError, match="not in the retrieved context"):
         validate(data)
 
 
 def test_fragment_must_appear_in_chunk():
-    data = answer(citas=[{"chunk_id": "SLA-B#tiempos", "fragmento": "respuesta en 10 minutos"}])
-    with pytest.raises(ValidationError, match="no aparece textual"):
+    data = answer(citas=[{"chunk_id": "SLA-B#tiempos", "fragmento": "response within 10 minutes"}])
+    with pytest.raises(ValidationError, match="does not appear verbatim"):
         validate(data)
 
 
 def test_fragment_match_ignores_case_spaces_and_quotes():
-    fragment = '"Falla   TOTAL: respuesta en 30 minutos."'
+    fragment = '"Total   OUTAGE: response within 30 minutes."'
     data = answer(citas=[{"chunk_id": "SLA-B#tiempos", "fragmento": fragment}])
     assert validate(data)
 
 
 def test_found_requires_citations():
-    with pytest.raises(ValidationError, match="al menos una cita"):
+    with pytest.raises(ValidationError, match="at least one citation"):
         validate(answer(citas=[]))
 
 
 def test_not_found_allows_empty_citations():
-    data = answer(encontrado=False, respuesta="No encontré información.", citas=[])
+    data = answer(encontrado=False, respuesta="No information found.", citas=[])
     assert validate(data).encontrado is False
 
 
 def test_without_context_only_shape_is_checked():
-    data = answer(citas=[{"chunk_id": "X#y", "fragmento": "cualquier cosa"}])
+    data = answer(citas=[{"chunk_id": "X#y", "fragmento": "anything"}])
     assert validate(data, chunks=None).citas[0].chunk_id == "X#y"
 
 
 def test_normalize():
-    assert normalize("  «Hola   Mundo…»  ") == "hola mundo"
+    assert normalize("  «Hello   World…»  ") == "hello world"

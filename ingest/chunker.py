@@ -1,11 +1,11 @@
-"""Chunking por encabezados con tamaño y solapamiento configurables.
+"""Heading-aware chunking with configurable size and overlap.
 
-Cada sección (`#`, `##`, `###`) es un chunk. Si una sección supera `chunk_size`
-caracteres, se parte por párrafos (y por palabras si un párrafo no cabe) y cada parte
-arranca con los últimos `overlap` caracteres de la anterior.
+Each section (`#`, `##`, `###`) becomes a chunk. Sections exceeding `chunk_size`
+characters are split by paragraph (and by word when necessary), with each subsequent
+part starting with the previous part's final `overlap` characters.
 
-`chunk_id` es determinista: `{doc_id}#{slug_de_la_seccion}`, con sufijo `-2`, `-3`... en
-las partes siguientes. Así el dataset de evaluación puede referirse a chunks concretos.
+`chunk_id` is deterministic: `{doc_id}#{section_slug}`, with `-2`, `-3`, ... suffixes
+for subsequent parts. This lets the evaluation dataset reference specific chunks.
 """
 
 from __future__ import annotations
@@ -33,7 +33,7 @@ class Chunk:
 
     @property
     def indexed_text(self) -> str:
-        """Texto que se indexa: la ruta de la sección da contexto a un párrafo suelto."""
+        """Text to index; the section path contextualizes an isolated paragraph."""
         return f"{self.section}\n{self.text}"
 
     def to_dict(self) -> dict:
@@ -46,16 +46,17 @@ class Chunk:
 
 def slugify(text: str) -> str:
     normalized = unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode()
-    return re.sub(r"[^a-z0-9]+", "-", normalized.lower()).strip("-") or "seccion"
+    return re.sub(r"[^a-z0-9]+", "-", normalized.lower()).strip("-") or "section"
 
 
 def chunk_document(doc: Document, chunk_size: int = 900, overlap: int = 150) -> list[Chunk]:
     if not 0 <= overlap < chunk_size:
-        raise ValueError("overlap debe ser >= 0 y menor que chunk_size.")
+        raise ValueError("overlap must be >= 0 and less than chunk_size.")
     chunks: list[Chunk] = []
     used_slugs: dict[str, int] = {}
     for path, body in _sections(doc.text):
-        slug = slugify(path[-1]) if path else "intro"
+        heading = path[-1] if path else ""
+        slug = (doc.section_slugs or {}).get(heading) or (slugify(heading) if heading else "intro")
         used_slugs[slug] = used_slugs.get(slug, 0) + 1
         if used_slugs[slug] > 1:
             slug = f"{slug}-{used_slugs[slug]}"
@@ -82,7 +83,7 @@ def chunk_documents(docs: list[Document], chunk_size: int = 900, overlap: int = 
 
 
 def _sections(text: str) -> list[tuple[list[str], str]]:
-    """Secciones con cuerpo como (ruta de encabezados, cuerpo). Las vacías se omiten."""
+    """Return non-empty sections as `(heading_path, body)` pairs."""
     sections: list[tuple[list[str], str]] = []
     stack: list[tuple[int, str]] = []
     body: list[str] = []
@@ -148,7 +149,7 @@ def _split_words(text: str, limit: int) -> list[str]:
 
 
 def _tail(text: str, size: int) -> str:
-    """Últimos `size` caracteres sin cortar una palabra a la mitad."""
+    """Return the final `size` characters without splitting a word."""
     if size <= 0:
         return ""
     tail = text[-size:]

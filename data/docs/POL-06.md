@@ -1,20 +1,24 @@
 ---
 id: POL-06
-titulo: Uso aceptable de equipos
-tipo: politica
-fecha: 2025-06-01
+title: Acceptable Use of Equipment
+type: policy
+date: '2025-06-01'
+section_slugs:
+  Assigned Equipment: equipos-asignados
+  Personal Use: uso-personal
+  Loss or Theft: perdida-o-robo
 ---
 
-# POL-06 · Uso aceptable de equipos
+# POL-06 · Acceptable Use of Equipment
 
-## Equipos asignados
+## Assigned Equipment
 
-Las laptops son propiedad de la empresa y se entregan con disco cifrado. Está prohibido instalar software sin licencia o desactivar el antivirus.
+Laptops are company property and are delivered with full disk encryption. It is prohibited to install unlicensed software or disable the antivirus.
 
-## Uso personal
+## Personal Use
 
-Se permite uso personal razonable siempre que no afecte la operación ni implique almacenar información de la empresa en servicios personales en la nube.
+Reasonable personal use is permitted as long as it does not interfere with operations or involve storing company information in personal cloud services.
 
-## Pérdida o robo
+## Loss or Theft
 
-Reporta la pérdida o robo a la mesa de servicio en menos de 4 horas para bloquear y borrar el equipo de forma remota.
+Report loss or theft to the service desk within less than 4 hours to remotely lock and wipe the device.

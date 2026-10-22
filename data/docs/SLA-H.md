@@ -1,20 +1,24 @@
 ---
 id: SLA-H
-titulo: VigiPro, seguridad física
-tipo: sla
-fecha: 2025-06-15
+title: VigiPro, Physical Security
+type: sla
+date: '2025-06-15'
+section_slugs:
+  Coverage: cobertura
+  Access Control: control-de-accesos
+  Incident Reporting: reporte-de-incidentes
 ---
 
-# SLA-H · VigiPro, seguridad física
+# SLA-H · VigiPro, Physical Security
 
-## Cobertura
+## Coverage
 
-Guardias 24x7 en los tres centros de distribución y rondines cada 2 horas en el estacionamiento de tráileres.
+24x7 guards at the three distribution centers and patrols every 2 hours in the trailer parking lot.
 
-## Control de accesos
+## Access Control
 
-Todo visitante se registra con identificación oficial y recibe gafete temporal. Los transportistas esperan en la caseta hasta que el andén asignado esté libre.
+All visitors register with official identification and receive a temporary badge. Carriers wait in the booth until the assigned dock is available.
 
-## Reporte de incidentes
+## Incident Reporting
 
-VigiPro entrega reporte escrito de cualquier incidente en menos de 2 horas y un resumen mensual con estadísticas.
+VigiPro provides a written report of any incident within less than 2 hours and a monthly summary with statistics.

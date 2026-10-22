@@ -1,20 +1,24 @@
 ---
 id: POL-09
-titulo: Gestión de proveedores
-tipo: politica
-fecha: 2025-11-05
+title: Vendor Management
+type: policy
+date: '2025-11-05'
+section_slugs:
+  Quarterly Evaluation: evaluacion-trimestral
+  Critical Vendors: proveedores-criticos
+  Improvement Plan: plan-de-mejora
 ---
 
-# POL-09 · Gestión de proveedores
+# POL-09 · Vendor Management
 
-## Evaluación trimestral
+## Quarterly Evaluation
 
-Cada proveedor crítico se evalúa cada trimestre con una calificación de 1 a 5 en cumplimiento de SLA, calidad y comunicación.
+Each critical vendor is evaluated quarterly on a 1-to-5 scale for SLA compliance, quality, and communication.
 
-## Proveedores críticos
+## Critical Vendors
 
-Se consideran críticos NetLink, OrionSoft, DataCenter Monterrey, CloudVault y RutaVeloz.
+The following are considered critical: NetLink, OrionSoft, DataCenter Monterrey, CloudVault, and RutaVeloz.
 
-## Plan de mejora
+## Improvement Plan
 
-Una calificación menor a 3 obliga a un plan de mejora de 60 días. Dos trimestres seguidos debajo de 3 habilitan la búsqueda de un proveedor alterno.
+A rating below 3 requires a 60-day improvement plan. Two consecutive quarters below 3 trigger a search for an alternative vendor.

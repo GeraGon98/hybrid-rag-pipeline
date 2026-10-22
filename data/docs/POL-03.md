@@ -1,20 +1,24 @@
 ---
 id: POL-03
-titulo: Gestión de cambios
-tipo: politica
-fecha: 2025-10-10
+title: Change Management
+type: policy
+date: '2025-10-10'
+section_slugs:
+  Change Types: tipos-de-cambio
+  Maintenance Windows: ventanas-de-mantenimiento
+  CAB Committee: comite-cab
 ---
 
-# POL-03 · Gestión de cambios
+# POL-03 · Change Management
 
-## Tipos de cambio
+## Change Types
 
-Estándar: preaprobado y de bajo riesgo. Normal: requiere aprobación del comité CAB. Emergencia: lo aprueba el gerente de guardia y se documenta en las siguientes 48 horas.
+Standard: pre-approved and low-risk. Normal: requires CAB committee approval. Emergency: approved by the on-call manager and documented within the following 48 hours.
 
-## Ventanas de mantenimiento
+## Maintenance Windows
 
-Los cambios normales se ejecutan los martes y jueves de 23:00 a 03:00. No se permiten cambios del día 28 al 3 de cada mes por el cierre contable.
+Normal changes are executed on Tuesdays and Thursdays from 23:00 to 03:00. No changes are allowed from the 28th to the 3rd of each month due to the closing period.
 
-## Comité CAB
+## CAB Committee
 
-El CAB se reúne los lunes a las 10:00. Las solicitudes deben registrarse antes del viernes a las 14:00 con plan de reversa probado.
+The CAB meets every Monday at 10:00. Requests must be registered before Friday at 14:00 with a proven rollback plan.

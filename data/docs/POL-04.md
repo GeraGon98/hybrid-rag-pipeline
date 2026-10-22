@@ -1,20 +1,24 @@
 ---
 id: POL-04
-titulo: Guardias on-call
-tipo: politica
-fecha: 2025-07-20
+title: On-Call Shifts
+type: policy
+date: '2025-07-20'
+section_slugs:
+  Rotation: rotacion
+  Response Times: tiempos-de-reaccion
+  Compensation: compensacion
 ---
 
-# POL-04 · Guardias on-call
+# POL-04 · On-Call Shifts
 
-## Rotación
+## Rotation
 
-Las guardias son semanales, de lunes 09:00 a lunes 09:00, con un ingeniero primario y uno secundario.
+Shifts are weekly, from Monday 09:00 to Monday 09:00, with a primary and a secondary engineer.
 
-## Tiempos de reacción
+## Response Times
 
-El primario debe reconocer la alerta en 10 minutos. Si no lo hace, la plataforma escala automáticamente al secundario y después al gerente de guardia.
+The primary must acknowledge the alert within 10 minutes. If not, the platform automatically escalates to the secondary and then to the on-call manager.
 
-## Compensación
+## Compensation
 
-Cada semana de guardia se paga con un bono fijo equivalente a 2 días de salario, más horas extra por intervenciones fuera de horario mayores a 30 minutos. Se otorga un día libre después de una noche con más de 3 horas de trabajo.
+Each week of on-call duty is compensated with a fixed bonus equivalent to 2 days of salary, plus overtime for interventions outside of working hours exceeding 30 minutes. A day off is granted after a night shift with more than 3 hours of work.

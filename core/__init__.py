@@ -1,1 +1,1 @@
-"""Núcleo: cliente LLM multi-proveedor con reintentos, fallback, costo y logging."""
+"""Core: multi-provider LLM client with retries, fallback, cost, and logging."""

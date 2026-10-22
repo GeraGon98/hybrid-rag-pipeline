@@ -1,20 +1,24 @@
 ---
 id: SLA-E
-titulo: HelpDesk Plus, mesa de servicio externa
-tipo: sla
-fecha: 2025-08-20
+title: HelpDesk Plus, External Support Desk
+type: sla
+date: '2025-08-20'
+section_slugs:
+  Hours: horario
+  Metrics: metricas
+  Scope: alcance
 ---
 
-# SLA-E · HelpDesk Plus, mesa de servicio externa
+# SLA-E · HelpDesk Plus, External Support Desk
 
-## Horario
+## Hours
 
-Atención de lunes a sábado de 7:00 a 22:00. Fuera de ese horario, las llamadas se desvían al ingeniero de guardia interno.
+Support available Monday to Saturday from 7:00 to 22:00. Calls outside of these hours are routed to the on-call internal engineer.
 
-## Métricas
+## Metrics
 
-Primer contacto resuelto en al menos 70 % de los casos y satisfacción mínima de 4.2 sobre 5 en la encuesta mensual.
+First Contact Resolution in at least 70 % of cases and minimum satisfaction of 4.2 out of 5 in the monthly survey.
 
-## Alcance
+## Scope
 
-Restablecimiento de contraseñas, configuración de equipos, impresoras de oficina y altas de usuarios. No atiende fallas de servidores ni de red.
+Password reset, device configuration, office printers, and user onboarding. Does not handle server or network failures.

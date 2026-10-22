@@ -1,8 +1,7 @@
-"""Adaptadores de proveedores de LLM.
+"""LLM provider adapters.
 
-Todos los proveedores se consumen vía su API compatible con OpenAI usando `httpx`, sin
-SDKs. Cada adaptador solo sabe hablar con su proveedor; el `LLMClient` decide a quién
-llamar, cuántas veces reintentar y cuándo hacer fallback.
+All providers use OpenAI-compatible APIs through `httpx`, without SDKs. Each adapter
+only communicates with its provider; `LLMClient` manages routing, retries, and fallback.
 """
 
 from __future__ import annotations
@@ -31,12 +30,12 @@ class Provider(Protocol):
 
 
 class OpenAICompatibleProvider:
-    """Adaptador base para cualquier API compatible con `/chat/completions` de OpenAI.
+    """Base adapter for any OpenAI-compatible `/chat/completions` API.
 
-    Capacidades:
-    - `supports_json_schema`: acepta `response_format={"type": "json_schema", ...}`.
-    - `supports_json_object`: acepta `response_format={"type": "json_object"}`.
-    Los defaults de la base corresponden a Groq con `openai/gpt-oss-*`.
+    Capabilities:
+    - `supports_json_schema`: accepts `response_format={"type": "json_schema", ...}`.
+    - `supports_json_object`: accepts `response_format={"type": "json_object"}`.
+    Base defaults match Groq with `openai/gpt-oss-*`.
     """
 
     name: str = ""
@@ -76,7 +75,7 @@ class OpenAICompatibleProvider:
         except httpx.TimeoutException as e:
             raise TransientProviderError(self.name, f"timeout: {e}") from e
         except httpx.TransportError as e:
-            raise TransientProviderError(self.name, f"error de conexión: {e}") from e
+            raise TransientProviderError(self.name, f"connection error: {e}") from e
         latency_ms = (time.perf_counter() - start) * 1000
 
         if response.status_code in TRANSIENT_STATUS_CODES:
@@ -90,7 +89,7 @@ class OpenAICompatibleProvider:
             text = choice["message"].get("content") or ""
         except (ValueError, KeyError, IndexError, TypeError) as e:
             raise PermanentProviderError(
-                self.name, f"respuesta inesperada: {e!r}", response.status_code
+                self.name, f"unexpected response: {e!r}", response.status_code
             ) from e
 
         usage = data.get("usage") or {}
@@ -109,12 +108,12 @@ class OpenAICompatibleProvider:
 
 
 def _short(response: httpx.Response, limit: int = 200) -> str:
-    """Resumen corto del cuerpo de error (nunca incluye los headers de la request)."""
+    """Short error-body summary that never includes request headers."""
     return " ".join(response.text.split())[:limit] or response.reason_phrase
 
 
 class GeminiProvider(OpenAICompatibleProvider):
-    # Endpoint oficial compatible con OpenAI (https://ai.google.dev/gemini-api/docs/openai).
+    # Official OpenAI-compatible endpoint (https://ai.google.dev/gemini-api/docs/openai).
     name = "gemini"
     base_url = "https://generativelanguage.googleapis.com/v1beta/openai/"
     supports_json_schema = True
@@ -122,7 +121,7 @@ class GeminiProvider(OpenAICompatibleProvider):
 
 
 class OllamaProvider(OpenAICompatibleProvider):
-    # docs.ollama.com/api/openai-compatibility: JSON mode sí; json_schema no está confirmado.
+    # docs.ollama.com/api/openai-compatibility: JSON mode is supported; schema mode is unconfirmed.
     name = "ollama"
     base_url = "http://localhost:11434/v1"
     supports_json_schema = False
@@ -135,7 +134,7 @@ class GroqProvider(OpenAICompatibleProvider):
 
 
 def build_provider(name: str, settings: Settings) -> Provider:
-    """Crea el adaptador de un proveedor a partir de la configuración."""
+    """Build a provider adapter from configuration."""
 
     def key(secret: SecretStr | None) -> str | None:
         return secret.get_secret_value() if secret is not None else None
@@ -152,4 +151,4 @@ def build_provider(name: str, settings: Settings) -> Provider:
             settings.ollama_timeout_s,
             base_url=settings.ollama_base_url,
         )
-    raise ValueError(f"Proveedor desconocido: {name!r}")
+    raise ValueError(f"Unknown provider: {name!r}")

@@ -1,11 +1,10 @@
-"""Registro estructurado de llamadas al LLM en formato JSONL (una línea por intento).
+"""Structured JSONL logging for LLM calls, one line per attempt.
 
-Regla de oro: aquí nunca se escriben llaves, headers, ni el texto del prompt, de la
-respuesta o de los documentos. Del prompt solo se guarda su tamaño en caracteres
-(`prompt_chars`) y, de la recuperación, la estrategia y los `chunk_ids` usados.
+API keys, headers, prompts, responses, and document text are never written here. Logs
+retain only prompt length (`prompt_chars`) plus retrieval strategy and used `chunk_ids`.
 
-Campos opcionales: `prompt_name`, `prompt_version`, `structured_schema`, `repair_attempt`,
-`retrieval_strategy` y `chunk_ids`. Solo se escriben cuando vienen.
+Optional fields are written only when supplied: `prompt_name`, `prompt_version`,
+`structured_schema`, `repair_attempt`, `retrieval_strategy`, and `chunk_ids`.
 """
 
 from __future__ import annotations
@@ -40,10 +39,10 @@ class CallLogger:
         retrieval_strategy: str | None = None,
         chunk_ids: list[str] | None = None,
     ) -> dict:
-        """Agrega un evento al archivo y lo devuelve.
+        """Append an event to the file and return it.
 
-        Cualquier campo opcional que no esté en la firma lanza `TypeError`: así nadie
-        puede colar texto del prompt al log por accidente.
+        Unknown optional fields raise `TypeError`, preventing prompt text from being
+        added accidentally.
         """
         event = {
             "request_id": uuid.uuid4().hex[:8],

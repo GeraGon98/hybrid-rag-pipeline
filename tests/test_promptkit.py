@@ -50,10 +50,10 @@ def test_rag_answer_v1_is_active(kit):
 
 
 def test_question_only_in_user_message(kit):
-    system, user = kit.get("rag_answer").render(question="¿Qué es CONC-02?")
+    system, user = kit.get("rag_answer").render(question="What is CONC-02?")
     assert "CONC-02" not in system["content"]
-    assert user["content"] == "Pregunta: ¿Qué es CONC-02?"
-    assert "<documentos>" in system["content"]
+    assert user["content"] == "Question: What is CONC-02?"
+    assert "<documents>" in system["content"]
 
 
 def test_missing_variable_names_it(kit):
@@ -71,17 +71,17 @@ def test_unknown_prompt_or_version(kit):
 def test_two_active_versions_fail(tmp_path):
     write_prompt(tmp_path, "demo", 1, active=True)
     write_prompt(tmp_path, "demo", 2, active=True)
-    with pytest.raises(ValueError, match="más de una versión activa"):
+    with pytest.raises(ValueError, match="more than one active version"):
         PromptKit(tmp_path).get("demo")
 
 
 def test_no_active_version_fails(tmp_path):
     write_prompt(tmp_path, "demo", 1, active=False)
-    with pytest.raises(PromptNotFoundError, match="ninguna versión activa"):
+    with pytest.raises(PromptNotFoundError, match="no active version"):
         PromptKit(tmp_path).get("demo")
 
 
 def test_name_must_match_folder(tmp_path):
-    write_prompt(tmp_path, "demo", 1, active=True, name="otro_nombre")
-    with pytest.raises(ValueError, match="carpeta"):
+    write_prompt(tmp_path, "demo", 1, active=True, name="other_name")
+    with pytest.raises(ValueError, match="folder"):
         PromptKit(tmp_path).get("demo")

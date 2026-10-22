@@ -1,4 +1,4 @@
-"""Recuperación: índice vectorial (Qdrant), BM25, fusión RRF y reranking con cross-encoder."""
+"""Retrieval: Qdrant vectors, BM25, RRF fusion, and cross-encoder reranking."""
 
 from retrieval.fusion import reciprocal_rank_fusion
 from retrieval.retriever import STRATEGIES, RetrievalResult, Retriever, ScoredChunk

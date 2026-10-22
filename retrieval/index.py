@@ -1,4 +1,4 @@
-"""Construcción y carga del índice: Qdrant embebido + `chunks.jsonl` para BM25."""
+"""Build and load the index: embedded Qdrant plus `chunks.jsonl` for BM25."""
 
 from __future__ import annotations
 
@@ -29,7 +29,7 @@ QDRANT_DIR = "qdrant"
 def build_index(
     docs_dir: Path, settings: Settings, embedder: Embedder | None = None
 ) -> list[Chunk]:
-    """Carga, trocea e indexa `docs_dir`. Reemplaza el índice anterior."""
+    """Load, chunk, and index `docs_dir`, replacing the previous index."""
     docs = load_directory(docs_dir)
     if not docs:
         raise FileNotFoundError(f"{docs_dir} no tiene documentos .md ni .pdf.")
@@ -52,7 +52,7 @@ def load_retriever(
     embedder: Embedder | None = None,
     scorer: PairScorer | None = None,
 ) -> Retriever:
-    """Abre el índice existente. El cross-encoder se carga hasta que se usa."""
+    """Open the existing index; load the cross-encoder lazily."""
     chunks = load_chunks(settings.index_dir / CHUNKS_FILE)
     store = VectorStore(
         embedder or SentenceTransformerEmbedder(settings.embedding_model),
@@ -78,6 +78,6 @@ def save_chunks(chunks: list[Chunk], path: Path) -> None:
 
 def load_chunks(path: Path) -> list[Chunk]:
     if not path.exists():
-        raise FileNotFoundError(f"No existe {path}. Corre `uv run main.py ingest` primero.")
+        raise FileNotFoundError(f"{path} does not exist. Run `uv run main.py ingest` first.")
     lines = path.read_text(encoding="utf-8").splitlines()
     return [Chunk.from_dict(json.loads(line)) for line in lines if line.strip()]

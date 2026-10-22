@@ -1,7 +1,7 @@
-"""Armado del contexto con presupuesto de tokens por sección.
+"""Build context under per-section token budgets.
 
-Orden de salida: `system` y `examples` van en el mensaje system; `history`, `documents`
-y `user` en el mensaje user, cada uno en su etiqueta, con la pregunta al final.
+Output order: `system` and `examples` go in the system message; `history`, `documents`,
+and `user` go in the user message, each in its tag, with the question last.
 """
 
 from __future__ import annotations
@@ -11,17 +11,17 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 
 SECTIONS = ("system", "examples", "history", "documents", "user")
-RESERVED_SECTIONS = ("output",)  # Se reserva en el presupuesto, pero no se llena.
-TRUNCATION_MARK = "[…recortado]"
+RESERVED_SECTIONS = ("output",)  # Reserved in the budget but never populated.
+TRUNCATION_MARK = "[…truncated]"
 
-_TAGS = {"examples": "ejemplos", "history": "historial", "documents": "documentos"}
+_TAGS = {"examples": "examples", "history": "history", "documents": "documents"}
 
 
 def estimate_tokens(text: str) -> int:
-    """Estima tokens como `ceil(caracteres / 4)`.
+    """Estimate tokens as `ceil(characters / 4)`.
 
-    Es una estimación por caracteres: cada proveedor tokeniza distinto. Sirve para
-    repartir el presupuesto; para cobrar vale el `usage` que regresa la API.
+    This character-based estimate allocates the budget despite provider tokenization
+    differences. Billing uses the API's reported `usage`.
     """
     return math.ceil(len(text) / 4)
 
@@ -37,7 +37,7 @@ class ContextReport:
 class _Item:
     content: str
     priority: int
-    order: int  # Orden de llegada: menor = más antiguo.
+    order: int  # Arrival order: lower means older.
     tokens: int = field(default=0)
 
 
@@ -47,7 +47,7 @@ class ContextManager:
     ) -> None:
         unknown = set(budget) - set(SECTIONS) - set(RESERVED_SECTIONS)
         if unknown:
-            raise ValueError(f"Secciones desconocidas en el presupuesto: {sorted(unknown)}")
+            raise ValueError(f"Unknown sections in budget: {sorted(unknown)}")
         self.budget = dict(budget)
         self.count_tokens = count_tokens
         self._items: dict[str, list[_Item]] = {section: [] for section in SECTIONS}
@@ -55,11 +55,11 @@ class ContextManager:
         self._last_report: ContextReport | None = None
 
     def add(self, section: str, content: str, priority: int = 0) -> None:
-        """Agrega un elemento. A mayor `priority`, más tarde se descarta."""
+        """Add an item. Higher `priority` values are discarded later."""
         if section not in SECTIONS:
-            raise ValueError(f"Sección desconocida: {section!r}. Usa una de: {SECTIONS}.")
+            raise ValueError(f"Unknown section: {section!r}. Use one of: {SECTIONS}.")
         if section not in self.budget:
-            raise ValueError(f"La sección {section!r} no tiene presupuesto asignado.")
+            raise ValueError(f"Section {section!r} has no assigned budget.")
         self._items[section].append(_Item(content, priority, self._counter))
         self._counter += 1
 
@@ -68,7 +68,7 @@ class ContextManager:
         return self._last_report
 
     def build(self) -> list[dict]:
-        """Aplica los presupuestos y devuelve los mensajes `system` y `user`."""
+        """Apply budgets and return the `system` and `user` messages."""
         kept: dict[str, list[str]] = {}
         tokens_by_section: dict[str, int] = {}
         truncated: list[str] = []
@@ -84,8 +84,8 @@ class ContextManager:
                 used = sum(item.tokens for item in items)
                 if used > budget:
                     raise ValueError(
-                        f"El system ocupa {used} tokens y su presupuesto es {budget}. "
-                        "El system nunca se recorta: acórtalo o sube su presupuesto."
+                        f"The system message uses {used} tokens but its budget is {budget}. "
+                        "It is never truncated; shorten it or increase its budget."
                     )
                 fitted, was_cut = [item.content for item in items], False
             else:
@@ -103,7 +103,7 @@ class ContextManager:
         return self._messages(kept)
 
     def _fit(self, items: list[_Item], budget: int) -> tuple[list[str], bool]:
-        """Descarta por prioridad (y antigüedad) y, si hace falta, recorta el último."""
+        """Discard by priority and age, then truncate the final item if needed."""
         remaining = list(items)
         was_cut = False
         while len(remaining) > 1 and sum(i.tokens for i in remaining) > budget:
@@ -112,14 +112,14 @@ class ContextManager:
             was_cut = True
 
         texts = [item.content for item in sorted(remaining, key=lambda i: i.order)]
-        if remaining and remaining[0].tokens > budget:  # Queda uno solo y no cabe.
+        if remaining and remaining[0].tokens > budget:  # One item remains and does not fit.
             cut = self._truncate(remaining[0].content, budget)
             texts = [cut] if cut else []
             was_cut = True
         return texts, was_cut
 
     def _truncate(self, text: str, budget: int) -> str | None:
-        """Recorta por el final el prefijo más largo que cabe junto con la marca."""
+        """Keep the longest prefix that fits alongside the truncation marker."""
 
         def fits(length: int) -> bool:
             candidate = f"{text[:length].rstrip()} {TRUNCATION_MARK}"
@@ -143,7 +143,7 @@ class ContextManager:
             system_parts.append(_wrap("examples", kept["examples"]))
 
         user_parts = [_wrap(s, kept[s]) for s in ("history", "documents") if kept.get(s)]
-        user_parts.extend(kept.get("user", []))  # La pregunta va al final.
+        user_parts.extend(kept.get("user", []))  # Keep the question last.
 
         messages = []
         if system_parts:

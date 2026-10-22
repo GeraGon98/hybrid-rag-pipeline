@@ -1,24 +1,29 @@
 ---
 id: SLA-B
-titulo: NetLink, enlaces MPLS
-tipo: sla
-fecha: 2025-10-15
+title: NetLink, MPLS Links
+type: sla
+date: '2025-10-15'
+section_slugs:
+  Service Scope: alcance-del-servicio
+  Availability: disponibilidad
+  Response and Resolution Times: tiempos-de-respuesta-y-resolucion
+  Penalties: penalizaciones
 ---
 
-# SLA-B · NetLink, enlaces MPLS
+# SLA-B · NetLink, MPLS Links
 
-## Alcance del servicio
+## Service Scope
 
-NetLink provee la red MPLS que conecta el centro de datos con 14 sucursales y 3 centros de distribución.
+NetLink provides the MPLS network connecting the data center to 14 branch offices and 3 distribution centers.
 
-## Disponibilidad
+## Availability
 
-Disponibilidad mensual comprometida de 99.7 % por circuito, medida por el monitoreo del proveedor y validada contra el nuestro.
+Monthly committed availability of 99.7 % per circuit, measured by the provider's monitoring and validated against ours.
 
-## Tiempos de respuesta y resolución
+## Response and Resolution Times
 
-Falla total: respuesta en 30 minutos y resolución en 4 horas. Degradación: respuesta en 2 horas y resolución en 12 horas.
+Complete failure: response within 30 minutes and resolution within 4 hours. Degradation: response within 2 hours and resolution within 12 hours.
 
-## Penalizaciones
+## Penalties
 
-Por cada hora completa por encima del tiempo de resolución se descuenta el 5 % de la renta mensual del circuito, con un tope de 30 %. La reclamación debe hacerse dentro de los 15 días naturales siguientes al cierre del mes.
+For each full hour exceeding the resolution time, 5 % of the monthly rental for the circuit is deducted, with a maximum of 30 %. The claim must be made within 15 natural days following the end of the month.

@@ -1,4 +1,4 @@
-"""Ingesta: carga de Markdown/PDF y chunking por secciones con metadatos."""
+"""Ingestion: load Markdown/PDF and create metadata-rich section chunks."""
 
 from ingest.chunker import Chunk, chunk_document, chunk_documents, slugify
 from ingest.loaders import (

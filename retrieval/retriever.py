@@ -1,13 +1,13 @@
-"""Recuperación con cuatro estrategias comparables.
+"""Retrieval with four comparable strategies.
 
-- `vector`: top-k por similitud coseno.
-- `bm25`: top-k léxico.
-- `hybrid`: `top_k_candidates` de cada buscador fusionados con RRF.
-- `hybrid_rerank`: los candidatos fusionados se reordenan con el cross-encoder.
+- `vector`: top-k by cosine similarity.
+- `bm25`: lexical top-k.
+- `hybrid`: merge `top_k_candidates` from each retriever with RRF.
+- `hybrid_rerank`: rerank the merged candidates with a cross-encoder.
 
-`relevance` resume qué tan bueno es el mejor resultado para decidir si vale la pena llamar
-al LLM. Los scores BM25 y RRF no están calibrados, así que se usa el score del reranker
-(0-1) cuando existe y, si no, la similitud coseno del mejor resultado vectorial.
+`relevance` summarizes the best result for deciding whether to call the LLM. BM25 and
+RRF scores are not calibrated, so it uses the reranker score (0-1) when available,
+otherwise the cosine similarity of the best vector result.
 """
 
 from __future__ import annotations
@@ -63,7 +63,7 @@ class Retriever:
 
     def search(self, question: str, strategy: str = "hybrid", k: int = 5) -> RetrievalResult:
         if strategy not in STRATEGIES:
-            raise ValueError(f"Estrategia desconocida: {strategy!r}. Usa una de: {STRATEGIES}.")
+            raise ValueError(f"Unknown strategy: {strategy!r}. Use one of: {STRATEGIES}.")
         if strategy == "bm25":
             ranked = self.bm25.search(question, k)
             vector_hits = self.vector_store.search(question, 1)
@@ -81,7 +81,7 @@ class Retriever:
             return self._result(strategy, fused[:k], _top_score(vector_hits), "vector")
 
         if self.reranker is None:
-            raise ValueError("La estrategia hybrid_rerank necesita un reranker.")
+            raise ValueError("The hybrid_rerank strategy requires a reranker.")
         candidates = [self.chunks[cid] for cid, _ in fused[: self.candidates]]
         reranked = self.reranker.rerank(question, candidates, k)
         scored = [ScoredChunk(chunk, score) for chunk, score in reranked]

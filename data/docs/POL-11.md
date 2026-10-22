@@ -1,20 +1,24 @@
 ---
 id: POL-11
-titulo: Postmortems
-tipo: politica
-fecha: 2025-09-25
+title: Postmortems
+type: policy
+date: '2025-09-25'
+section_slugs:
+  When Required: cuando-se-requiere
+  Timeline and Format: plazo-y-formato
+  Blameless Focus: enfoque-sin-culpables
 ---
 
 # POL-11 · Postmortems
 
-## Cuándo se requiere
+## When Required
 
-Todo incidente P1 y todo P2 con duración mayor a 4 horas requiere postmortem.
+All P1 incidents and all P2 incidents lasting more than 4 hours require a postmortem.
 
-## Plazo y formato
+## Timeline and Format
 
-El documento se publica en un máximo de 5 días hábiles e incluye línea de tiempo, causa raíz, impacto y acciones con responsable y fecha.
+The document is published within a maximum of 5 business days and includes timeline, root cause, impact, and corrective actions with responsible party and due date.
 
-## Enfoque sin culpables
+## Blameless Focus
 
-El análisis se centra en procesos y sistemas, no en personas. Las acciones correctivas se revisan en la junta semanal de operaciones hasta su cierre.
+The analysis focuses on processes and systems, not on individuals. Corrective actions are reviewed during the weekly operations meeting until closure.

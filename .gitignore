@@ -10,10 +10,10 @@ dist/
 .coverage
 htmlcov/
 
-# Secretos
+# Secrets
 .env
 
-# Índices y logs generados (se conservan los .gitkeep)
+# Generated indexes and logs (.gitkeep files remain tracked)
 data/index/
 logs/*.jsonl
 logs/*.txt

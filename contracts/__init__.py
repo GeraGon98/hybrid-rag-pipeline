@@ -1,4 +1,4 @@
-"""Contratos de salida: `RespuestaConCitas` y la generación estructurada con reparación."""
+"""Output contracts: `RespuestaConCitas` and repairable structured generation."""
 
 from contracts.answer import Cita, RespuestaConCitas
 from contracts.structured_output import StructuredOutputError, generate_structured

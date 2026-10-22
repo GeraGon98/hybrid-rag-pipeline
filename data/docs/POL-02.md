@@ -1,20 +1,24 @@
 ---
 id: POL-02
-titulo: Contraseñas y MFA
-tipo: politica
-fecha: 2025-08-01
+title: Passwords and MFA
+type: policy
+date: '2025-08-01'
+section_slugs:
+  Password Requirements: requisitos-de-contrasena
+  Second Factor: segundo-factor
+  Service Accounts: cuentas-de-servicio
 ---
 
-# POL-02 · Contraseñas y MFA
+# POL-02 · Passwords and MFA
 
-## Requisitos de contraseña
+## Password Requirements
 
-Mínimo 14 caracteres, sin caducidad periódica salvo sospecha de compromiso. La cuenta se bloquea 15 minutos tras 10 intentos fallidos.
+Minimum 14 characters, no periodic expiration unless suspected compromise. The account is locked for 15 minutes after 10 failed attempts.
 
-## Segundo factor
+## Second Factor
 
-MFA obligatorio para correo, VPN, ERP Orion y consolas de administración. Se aceptan aplicación autenticadora o llave física; no se permite SMS.
+MFA is required for email, VPN, ERP Orion, and administration consoles. Authenticator app or physical key are accepted; SMS is not permitted.
 
-## Cuentas de servicio
+## Service Accounts
 
-Las cuentas de servicio usan contraseñas de 32 caracteres guardadas en la bóveda de secretos y se rotan cada 180 días.
+Service accounts use 32-character passwords stored in the secret vault and are rotated every 180 days.

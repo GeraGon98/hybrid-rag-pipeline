@@ -1,7 +1,7 @@
-"""Registry de prompts versionados en YAML.
+"""Registry of versioned YAML prompts.
 
-Cada prompt vive en `prompts/<nombre>/v<N>.yaml`. Exactamente una versión por prompt
-tiene `active: true`; esa es la que se usa si no pides una versión concreta.
+Each prompt lives at `prompts/<name>/v<N>.yaml`. Exactly one version per prompt has
+`active: true`; that version is used unless a specific version is requested.
 """
 
 from __future__ import annotations
@@ -17,12 +17,12 @@ from jinja2 import Environment, StrictUndefined, UndefinedError
 REQUIRED_KEYS = ("name", "version", "active", "description", "model_params", "system", "user")
 _VERSION_FILE = re.compile(r"^v(\d+)\.yaml$")
 
-# Las plantillas se cargan desde string: sin loader, la plantilla no puede leer archivos.
+# Templates load from strings, so they cannot read files through a Jinja loader.
 _ENV = Environment(autoescape=False, keep_trailing_newline=False, undefined=StrictUndefined)
 
 
 class PromptNotFoundError(LookupError):
-    """El prompt o la versión pedida no existe."""
+    """The requested prompt or version does not exist."""
 
 
 @dataclass(frozen=True)
@@ -36,9 +36,9 @@ class Prompt:
     examples: list[dict]
 
     def render(self, **variables) -> list[dict]:
-        """Devuelve los mensajes `system` y `user` listos para `LLMClient.generate()`.
+        """Return `system` and `user` messages ready for `LLMClient.generate()`.
 
-        `examples` se inyecta solo; el llamador solo pasa sus variables.
+        `examples` is injected automatically; callers pass only their variables.
         """
         context = {"examples": self.examples, **variables}
         try:
@@ -46,7 +46,7 @@ class Prompt:
             user = _ENV.from_string(self.user_template).render(context)
         except UndefinedError as e:
             raise ValueError(
-                f"Falta una variable al renderizar {self.name} v{self.version}: {e.message}"
+                f"Missing variable while rendering {self.name} v{self.version}: {e.message}"
             ) from e
         return [
             {"role": "system", "content": system.strip()},
@@ -59,16 +59,16 @@ class PromptKit:
         self.root = Path(root)
 
     def versions(self, name: str) -> list[int]:
-        """Versiones disponibles de un prompt, de menor a mayor."""
+        """Available prompt versions in ascending order."""
         return sorted(self._files(name))
 
     def get(self, name: str, version: int | None = None) -> Prompt:
-        """Devuelve la versión pedida o, si no se indica, la que tiene `active: true`."""
+        """Return the requested version, or the active version when omitted."""
         files = self._files(name)
         if version is not None:
             if version not in files:
                 raise PromptNotFoundError(
-                    f"No existe {name} v{version}. Versiones disponibles: {sorted(files)}."
+                    f"{name} v{version} does not exist. Available versions: {sorted(files)}."
                 )
             return self._build(name, version, self._load(files[version], name, version))
 
@@ -76,40 +76,39 @@ class PromptKit:
         active = [v for v, data in loaded.items() if data["active"] is True]
         if len(active) != 1:
             paths = ", ".join(str(files[v]) for v in (active or sorted(files)))
-            problem = "ninguna versión activa" if not active else "más de una versión activa"
+            problem = "no active version" if not active else "more than one active version"
             error = PromptNotFoundError if not active else ValueError
             raise error(
-                f"{name} tiene {problem}: debe haber exactamente una con `active: true`. "
-                f"Revisa: {paths}"
+                f"{name} has {problem}; exactly one must have `active: true`. Check: {paths}"
             )
         return self._build(name, active[0], loaded[active[0]])
 
     def _files(self, name: str) -> dict[int, Path]:
         folder = self.root / name
         if not folder.is_dir():
-            raise PromptNotFoundError(f"No existe el prompt {name!r} (se buscó en {folder}).")
+            raise PromptNotFoundError(f"Prompt {name!r} does not exist (searched {folder}).")
         files = {}
         for path in folder.glob("v*.yaml"):
             match = _VERSION_FILE.match(path.name)
             if match:
                 files[int(match.group(1))] = path
         if not files:
-            raise PromptNotFoundError(f"{folder} no tiene archivos v<N>.yaml.")
+            raise PromptNotFoundError(f"{folder} has no v<N>.yaml files.")
         return files
 
     @staticmethod
     def _load(path: Path, name: str, version: int) -> dict:
         data = yaml.safe_load(path.read_text(encoding="utf-8"))
         if not isinstance(data, dict):
-            raise ValueError(f"{path} no contiene un mapa YAML.")
+            raise ValueError(f"{path} does not contain a YAML mapping.")
         missing = [key for key in REQUIRED_KEYS if key not in data]
         if missing:
-            raise ValueError(f"{path} no tiene los campos: {', '.join(missing)}.")
+            raise ValueError(f"{path} is missing fields: {', '.join(missing)}.")
         if data["name"] != name:
-            raise ValueError(f"{path}: name es {data['name']!r} pero la carpeta es {name!r}.")
+            raise ValueError(f"{path}: name is {data['name']!r}, but the folder is {name!r}.")
         if data["version"] != version:
             raise ValueError(
-                f"{path}: version es {data['version']!r} pero el archivo es v{version}.yaml."
+                f"{path}: version is {data['version']!r}, but the file is v{version}.yaml."
             )
         return data
 

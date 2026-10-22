@@ -1,4 +1,4 @@
-"""Asistente RAG: recupera, decide si hay contexto suficiente y genera la respuesta citada."""
+"""RAG assistant: retrieve context, gate relevance, and generate a cited answer."""
 
 from __future__ import annotations
 
@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 
 PROMPT_NAME = "rag_answer"
 PROMPTS_DIR = Path(__file__).resolve().parent.parent / "prompts"
-NO_INFO = "No encontré información sobre eso en la documentación disponible."
+NO_INFO = "I could not find that information in the available documentation."
 
 
 @dataclass
@@ -75,7 +75,7 @@ class RAGAssistant:
         )
 
     def ask(self, question: str, strategy: str = "hybrid", k: int | None = None) -> RAGAnswer:
-        """Responde `question`. Si la relevancia queda bajo el umbral, no llama al LLM."""
+        """Answer `question`; skip the LLM when relevance is below the threshold."""
         self.client.reset_totals()
         retrieval = self.retriever.search(question, strategy, k or self.top_k)
         threshold = self.thresholds[retrieval.relevance_source]
@@ -115,7 +115,7 @@ class RAGAssistant:
     def _messages(
         self, question: str, retrieval: RetrievalResult
     ) -> tuple[list[dict], ContextReport | None, dict[str, str]]:
-        """Arma los mensajes con presupuesto y regresa los chunks que quedaron visibles."""
+        """Build budgeted messages and return the chunks that remain visible."""
         system, user = (m["content"] for m in self.prompt.render(question=question))
         manager = ContextManager(self.context_budget)
         manager.add("system", system)

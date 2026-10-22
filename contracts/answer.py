@@ -1,8 +1,8 @@
-"""Contrato de la respuesta del asistente: texto más citas verificables.
+"""Assistant response contract: answer text with verifiable citations.
 
-Con `context={"chunks": {chunk_id: texto}}` el validador exige que cada cita apunte a un
-chunk que estuvo en el contexto y que su fragmento aparezca textual en ese chunk. Sin
-contexto solo se validan la forma y la regla `encontrado=True` => al menos una cita.
+With `context={"chunks": {chunk_id: text}}`, every citation must reference a chunk in
+the supplied context and its excerpt must appear verbatim. Without context, validation
+only checks the shape and the rule `encontrado=True` => at least one citation.
 """
 
 from __future__ import annotations
@@ -16,25 +16,25 @@ _EDGE_CHARS = " \t\n\"'“”‘’«».…"
 
 
 class Cita(BaseModel):
-    chunk_id: str = Field(min_length=1, description="Identificador exacto del chunk citado.")
+    chunk_id: str = Field(min_length=1, description="Exact identifier of the cited chunk.")
     fragmento: str = Field(
         min_length=3,
         max_length=400,
-        description="Frase copiada textualmente del chunk que respalda la respuesta.",
+        description="Verbatim excerpt from the chunk supporting the answer.",
     )
 
 
 class RespuestaConCitas(BaseModel):
     encontrado: bool = Field(
-        description="false si los documentos no contienen la respuesta a la pregunta."
+        description="false when the documents do not contain the answer."
     )
-    respuesta: str = Field(min_length=1, description="Respuesta breve en español.")
-    citas: list[Cita] = Field(description="Citas que respaldan la respuesta.")
+    respuesta: str = Field(min_length=1, description="Concise answer in English.")
+    citas: list[Cita] = Field(description="Citations supporting the answer.")
 
     @model_validator(mode="after")
     def _check_citations(self, info: ValidationInfo) -> RespuestaConCitas:
         if self.encontrado and not self.citas:
-            raise ValueError("encontrado=true exige al menos una cita.")
+            raise ValueError("encontrado=true requires at least one citation.")
         chunks: dict[str, str] | None = (info.context or {}).get("chunks")
         if chunks is None:
             return self
@@ -43,18 +43,18 @@ class RespuestaConCitas(BaseModel):
             if text is None:
                 allowed = ", ".join(sorted(chunks))
                 raise ValueError(
-                    f"citas[{index}].chunk_id {cita.chunk_id!r} no está en el contexto "
-                    f"recuperado. Usa solo: {allowed}."
+                    f"citas[{index}].chunk_id {cita.chunk_id!r} is not in the retrieved "
+                    f"context. Use only: {allowed}."
                 )
             if normalize(cita.fragmento) not in normalize(text):
                 raise ValueError(
-                    f"citas[{index}].fragmento no aparece textual en {cita.chunk_id}. "
-                    "Copia la frase exacta del documento."
+                    f"citas[{index}].fragmento does not appear verbatim in {cita.chunk_id}. "
+                    "Copy the exact sentence from the document."
                 )
         return self
 
 
 def normalize(text: str) -> str:
-    """Minúsculas, espacios colapsados y sin comillas o puntos en los extremos."""
+    """Lowercase text, collapse whitespace, and trim surrounding quotes or periods."""
     text = unicodedata.normalize("NFKC", text).lower()
     return re.sub(r"\s+", " ", text).strip(_EDGE_CHARS)

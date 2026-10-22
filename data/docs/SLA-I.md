@@ -1,20 +1,24 @@
 ---
 id: SLA-I
-titulo: CloudVault, respaldos en la nube
-tipo: sla
-fecha: 2025-11-20
+title: CloudVault, Cloud Backups
+type: sla
+date: '2025-11-20'
+section_slugs:
+  Service: servicio
+  Retention: retencion
+  Restoration: restauracion
 ---
 
-# SLA-I · CloudVault, respaldos en la nube
+# SLA-I · CloudVault, Cloud Backups
 
-## Servicio
+## Service
 
-Almacenamiento de respaldos cifrados con AES-256 en dos regiones geográficas distintas.
+Encrypted backup storage using AES-256 across two distinct geographic regions.
 
-## Retención
+## Retention
 
-Los respaldos diarios se conservan 35 días y los mensuales 12 meses, alineado con POL-05.
+Daily backups are retained for 35 days and monthly backups for 12 months, aligned with POL-05.
 
-## Restauración
+## Restoration
 
-Tiempo de inicio de descarga de un respaldo menor a 1 hora. Pruebas de restauración trimestrales con evidencia firmada por ambas partes.
+Backup download initiation time less than 1 hour. Quarterly restoration tests with signed evidence from both parties.

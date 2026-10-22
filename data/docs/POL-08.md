@@ -1,20 +1,24 @@
 ---
 id: POL-08
-titulo: Clasificación de información
-tipo: politica
-fecha: 2025-05-10
+title: Information Classification
+type: policy
+date: '2025-05-10'
+section_slugs:
+  Levels: niveles
+  Handling: manejo
+  Labeling: etiquetado
 ---
 
-# POL-08 · Clasificación de información
+# POL-08 · Information Classification
 
-## Niveles
+## Levels
 
-Pública, Interna, Confidencial y Restringida. Los contratos con proveedores y los datos de clientes son Confidenciales; la nómina y las llaves criptográficas son Restringidas.
+Public, Internal, Confidential, and Restricted. Contracts with vendors and customer data are Confidential; payroll and cryptographic keys are Restricted.
 
-## Manejo
+## Handling
 
-La información Confidencial solo se comparte con cuentas corporativas y nunca en memorias USB sin cifrar. La Restringida requiere aprobación del dueño de la información para cada acceso.
+Confidential information is shared only with corporate accounts and never on unencrypted USB drives. Restricted information requires approval from the information owner for each access.
 
-## Etiquetado
+## Labeling
 
-Todo documento Confidencial o Restringido lleva la etiqueta del nivel en el encabezado.
+All Confidential or Restricted documents carry the level label in the header.

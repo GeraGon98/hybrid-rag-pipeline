@@ -11,7 +11,7 @@ from tests.conftest import SAMPLE_CHUNKS, FakeEmbedder, FakeScorer, make_retriev
 
 @pytest.mark.parametrize("strategy", ["vector", "bm25", "hybrid", "hybrid_rerank"])
 def test_every_strategy_finds_the_code(retriever, strategy):
-    result = retriever.search("¿Qué es el ticket T-1042?", strategy, k=2)
+    result = retriever.search("What is ticket T-1042?", strategy, k=2)
 
     assert result.strategy == strategy
     assert result.chunk_ids[0] == "RB-07#descripcion"
@@ -39,7 +39,7 @@ def test_reranker_only_runs_for_hybrid_rerank():
 
 
 def test_unknown_strategy(retriever):
-    with pytest.raises(ValueError, match="desconocida"):
+    with pytest.raises(ValueError, match="Unknown strategy"):
         retriever.search("x", "magic", 2)
 
 
@@ -58,7 +58,7 @@ def test_vector_store_reindex_replaces_collection():
     store = VectorStore(FakeEmbedder())
     store.index(SAMPLE_CHUNKS)
     store.index(SAMPLE_CHUNKS[:1])
-    assert [cid for cid, _ in store.search("contraseñas", 10)] == ["RB-07#descripcion"]
+    assert [cid for cid, _ in store.search("passwords", 10)] == ["RB-07#descripcion"]
     store.close()
 
 
@@ -66,8 +66,8 @@ def test_build_and_load_index_on_disk(tmp_path):
     docs = tmp_path / "docs"
     docs.mkdir()
     (docs / "RB-07.md").write_text(
-        "---\nid: RB-07\ntitulo: Inventario\n---\n\n# RB-07\n\n## Descripción\n\n"
-        "El ticket T-1042 sigue abierto.\n\n## Prevención\n\nValidar longitud del SKU.\n",
+        "---\nid: RB-07\ntitle: Inventory\n---\n\n# RB-07\n\n## Description\n\n"
+        "Ticket T-1042 remains open.\n\n## Prevention\n\nValidate SKU length.\n",
         encoding="utf-8",
     )
     settings = Settings(_env_file=None, primary="ollama", fallbacks=[], index_dir=tmp_path / "idx")
@@ -79,7 +79,7 @@ def test_build_and_load_index_on_disk(tmp_path):
 
     retriever = load_retriever(settings, embedder=FakeEmbedder(), scorer=FakeScorer())
     try:
-        assert retriever.search("T-1042", "hybrid_rerank", 1).chunk_ids == ["RB-07#descripcion"]
+        assert retriever.search("T-1042", "hybrid_rerank", 1).chunk_ids == ["RB-07#description"]
     finally:
         retriever.vector_store.close()
 

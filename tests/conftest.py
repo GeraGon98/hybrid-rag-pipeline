@@ -1,4 +1,4 @@
-"""Utilidades compartidas por los tests. Ningún test usa la red ni descarga modelos."""
+"""Shared test utilities. Tests never use the network or download models."""
 
 from __future__ import annotations
 
@@ -19,7 +19,7 @@ from retrieval.vector_store import VectorStore
 
 
 class FakeProvider:
-    """Proveedor configurable: devuelve (o lanza) los elementos de `script` en orden."""
+    """Configurable provider that returns or raises `script` items in order."""
 
     def __init__(
         self,
@@ -46,7 +46,7 @@ class FakeProvider:
 
 
 class FakeSleep:
-    """Reemplazo de time.sleep que solo registra las esperas."""
+    """time.sleep replacement that only records delays."""
 
     def __init__(self) -> None:
         self.waits: list[float] = []
@@ -56,7 +56,7 @@ class FakeSleep:
 
 
 class FakeEmbedder:
-    """Bolsa de palabras hasheada y normalizada: textos con palabras en común se parecen."""
+    """Normalized hashed bag of words; shared words make texts similar."""
 
     dim = 64
 
@@ -75,7 +75,7 @@ class FakeEmbedder:
 
 
 class FakeScorer:
-    """Fracción de tokens de la consulta presentes en el texto."""
+    """Fraction of query tokens present in the text."""
 
     def __init__(self) -> None:
         self.calls = 0
@@ -102,16 +102,16 @@ def read_events(path: Path) -> list[dict]:
     return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines()]
 
 
-def make_chunk(chunk_id: str, text: str, section: str = "Doc > Sección") -> Chunk:
+def make_chunk(chunk_id: str, text: str, section: str = "Doc > Section") -> Chunk:
     doc_id = chunk_id.split("#")[0]
     return Chunk(chunk_id, doc_id, f"{doc_id}.md", doc_id, section, "runbook", None, text)
 
 
 SAMPLE_CHUNKS = [
-    make_chunk("RB-07#descripcion", "El ticket T-1042 es la desincronización de inventario."),
-    make_chunk("SLA-B#tiempos", "NetLink responde en 30 minutos ante una falla total del enlace."),
-    make_chunk("POL-02#contrasenas", "Las contraseñas tienen mínimo 14 caracteres y MFA."),
-    make_chunk("POL-06#robo", "Reporta la pérdida o robo de la laptop en menos de 4 horas."),
+    make_chunk("RB-07#descripcion", "Ticket T-1042 is an inventory synchronization issue."),
+    make_chunk("SLA-B#tiempos", "NetLink responds within 30 minutes to a total link outage."),
+    make_chunk("POL-02#contrasenas", "Passwords require at least 14 characters and MFA."),
+    make_chunk("POL-06#robo", "Report a lost or stolen laptop within 4 hours."),
 ]
 
 
@@ -148,6 +148,6 @@ def retriever():
 
 @pytest.fixture(autouse=True)
 def _clean_env(monkeypatch: pytest.MonkeyPatch) -> None:
-    """Evita que las variables del entorno o el .env afecten los tests."""
+    """Prevent environment variables and .env from affecting tests."""
     for var in ("GEMINI_API_KEY", "GROQ_API_KEY", "PRIMARY", "FALLBACKS", "MIN_RELEVANCE"):
         monkeypatch.delenv(var, raising=False)

@@ -1,4 +1,4 @@
-"""Context engineering: armado del contexto con presupuesto de tokens por sección."""
+"""Context engineering with per-section token budgets."""
 
 from context.manager import ContextManager, ContextReport, estimate_tokens
 

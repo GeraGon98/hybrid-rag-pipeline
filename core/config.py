@@ -1,6 +1,6 @@
-"""Configuración del pipeline, leída de variables de entorno y del archivo `.env`.
+"""Pipeline configuration loaded from environment variables and `.env`.
 
-Si falta una variable, el programa falla al inicio, no a mitad de una pregunta.
+Missing variables fail at startup rather than midway through a request.
 """
 
 from __future__ import annotations
@@ -13,7 +13,7 @@ from pydantic_settings import BaseSettings
 
 KNOWN_PROVIDERS = ("gemini", "groq", "ollama")
 
-# Proveedor -> variable de entorno con su llave. Ollama corre local y no necesita llave.
+# Provider -> API-key environment variable. Local Ollama requires no key.
 _KEY_ENV_VARS = {"gemini": "GEMINI_API_KEY", "groq": "GROQ_API_KEY"}
 
 
@@ -44,12 +44,12 @@ class Settings(BaseSettings):
     top_k_candidates: int = 20
     top_k: int = 5
     rrf_k: int = 60
-    # Umbrales para decidir "no encontré información": score del reranker (0-1) en
-    # hybrid_rerank y coseno del mejor resultado vectorial en las demás estrategias.
+    # "No information found" thresholds: reranker score (0-1) for hybrid_rerank and
+    # cosine similarity of the best vector result for other strategies.
     min_relevance: float = 0.01
     min_vector_similarity: float = 0.80
 
-    # Tokens por sección del contexto (ver context/manager.py).
+    # Token budget per context section (see context/manager.py).
     context_budget: dict[str, int] = {"system": 1200, "documents": 3000, "user": 300, "output": 800}
 
     @model_validator(mode="after")
@@ -57,24 +57,24 @@ class Settings(BaseSettings):
         for name in [self.primary, *self.fallbacks]:
             if name not in KNOWN_PROVIDERS:
                 raise ValueError(
-                    f"Proveedor desconocido: {name!r}. Usa uno de: {', '.join(KNOWN_PROVIDERS)}."
+                    f"Unknown provider: {name!r}. Use one of: {', '.join(KNOWN_PROVIDERS)}."
                 )
             if name == "ollama":
                 continue
             if getattr(self, f"{name}_api_key") is None:
                 env_var = _KEY_ENV_VARS[name]
                 raise ValueError(
-                    f"Falta la llave de {name}. Agrega {env_var}=... a tu archivo .env "
-                    f"o quita {name!r} de PRIMARY/FALLBACKS."
+                    f"Missing {name} API key. Add {env_var}=... to your .env file "
+                    f"or remove {name!r} from PRIMARY/FALLBACKS."
                 )
         if not 0 <= self.chunk_overlap < self.chunk_size:
-            raise ValueError("CHUNK_OVERLAP debe ser >= 0 y menor que CHUNK_SIZE.")
+            raise ValueError("CHUNK_OVERLAP must be >= 0 and less than CHUNK_SIZE.")
         if self.top_k > self.top_k_candidates:
-            raise ValueError("TOP_K no puede ser mayor que TOP_K_CANDIDATES.")
+            raise ValueError("TOP_K cannot exceed TOP_K_CANDIDATES.")
         return self
 
 
 @lru_cache
 def get_settings() -> Settings:
-    """Devuelve la configuración, creada la primera vez que se pide (no al importar)."""
+    """Return configuration, created on first use rather than at import time."""
     return Settings()

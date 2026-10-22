@@ -1,20 +1,24 @@
 ---
 id: SLA-F
-titulo: MontaServ, mantenimiento de montacargas
-tipo: sla
-fecha: 2025-07-01
+title: MontaServ, elevator maintenance
+type: sla
+date: '2025-07-01'
+section_slugs:
+  Preventive Maintenance: mantenimiento-preventivo
+  Failures: fallas
+  Penalties: penalizaciones
 ---
 
-# SLA-F · MontaServ, mantenimiento de montacargas
+# SLA-F · MontaServ, elevator maintenance
 
-## Mantenimiento preventivo
+## Preventive Maintenance
 
-Cada montacargas recibe servicio preventivo cada 250 horas de operación o cada 3 meses, lo que ocurra primero.
+Each elevator receives preventive service every 250 hours of operation or every 3 months, whichever occurs first.
 
-## Fallas
+## Failures
 
-Para un montacargas detenido, MontaServ debe llegar en 4 horas en zona metropolitana y 8 horas en centros foráneos. Si la reparación excede 48 horas, debe proveer un equipo de reemplazo.
+For a stopped elevator, MontaServ must arrive within 4 hours in metropolitan areas and 8 hours in remote locations. If the repair exceeds 48 hours, a replacement unit must be provided.
 
-## Penalizaciones
+## Penalties
 
-Cada día sin reemplazo después de las 48 horas genera una penalización de 2,000 MXN por equipo.
+Each day without replacement after 48 hours incurs a penalty of 2,000 MXN per unit.

@@ -11,14 +11,14 @@ from core.llm_client import LLMClient
 from tests.conftest import FakeProvider, make_response, read_events
 
 MESSAGES = [
-    {"role": "system", "content": "Responde con citas."},
-    {"role": "user", "content": "Pregunta: ¿Qué es T-1042?"},
+    {"role": "system", "content": "Answer with citations."},
+    {"role": "user", "content": "Question: What is T-1042?"},
 ]
-CHUNKS = {"RB-07#descripcion": "El ticket T-1042 es la desincronización de inventario."}
+CHUNKS = {"RB-07#descripcion": "Ticket T-1042 is an inventory synchronization issue."}
 VALID = {
     "encontrado": True,
-    "respuesta": "Es la desincronización de inventario.",
-    "citas": [{"chunk_id": "RB-07#descripcion", "fragmento": "El ticket T-1042 es la"}],
+    "respuesta": "It is an inventory synchronization issue.",
+    "citas": [{"chunk_id": "RB-07#descripcion", "fragmento": "Ticket T-1042 is an"}],
 }
 
 
@@ -65,7 +65,7 @@ def test_invalid_json_is_repaired(logger, fake_sleep):
 
     second_history = provider.calls[1]["messages"]
     assert second_history[-2] == {"role": "assistant", "content": '{"encontrado": true'}
-    assert "no cumple el formato" in second_history[-1]["content"]
+    assert "does not match the required format" in second_history[-1]["content"]
 
 
 def test_repairs_exhausted_raise(logger, fake_sleep):
@@ -76,12 +76,12 @@ def test_repairs_exhausted_raise(logger, fake_sleep):
         generate_structured(client, MESSAGES, RespuestaConCitas, max_repairs=2)
 
     assert exc_info.value.attempts == 3
-    assert "al menos una cita" in exc_info.value.last_error
+    assert "at least one citation" in exc_info.value.last_error
     assert len(provider.calls) == 3
 
 
 def test_permanent_provider_error_is_not_repaired(logger, fake_sleep):
-    error = PermanentProviderError("groq", "schema no soportado", 400)
+    error = PermanentProviderError("groq", "unsupported schema", 400)
     provider, client = make_client([error], logger, fake_sleep)
 
     with pytest.raises(AllProvidersFailedError):
@@ -110,7 +110,7 @@ def test_strategy_json_object_adds_schema_to_system(logger, fake_sleep):
     call = provider.calls[0]
     assert call["params"]["response_format"] == {"type": "json_object"}
     assert "JSON Schema" in call["messages"][0]["content"]
-    assert MESSAGES[0]["content"] == "Responde con citas."
+    assert MESSAGES[0]["content"] == "Answer with citations."
 
 
 def test_strategy_instruction_only_strips_fences(logger, fake_sleep):
@@ -124,7 +124,7 @@ def test_strategy_instruction_only_strips_fences(logger, fake_sleep):
 
 
 def test_repair_attempt_and_schema_in_log(logger, log_path, fake_sleep):
-    _, client = make_client([respond("no es json"), respond(VALID)], logger, fake_sleep)
+    _, client = make_client([respond("not json"), respond(VALID)], logger, fake_sleep)
 
     generate_structured(
         client, MESSAGES, RespuestaConCitas, log_extra={"retrieval_strategy": "bm25"}

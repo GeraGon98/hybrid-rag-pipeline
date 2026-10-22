@@ -1,4 +1,4 @@
-"""Cliente LLM con reintentos, backoff exponencial y fallback entre proveedores."""
+"""LLM client with retries, exponential backoff, and provider fallback."""
 
 from __future__ import annotations
 
@@ -30,7 +30,7 @@ class LLMResponse:
 
 @dataclass
 class UsageTotals:
-    """Acumulado de las respuestas exitosas desde el último `reset_totals()`."""
+    """Successful-response totals since the last `reset_totals()`."""
 
     calls: int = 0
     tokens_in: int = 0
@@ -59,7 +59,7 @@ class LLMClient:
         sleep: Callable[[float], None] = time.sleep,
     ) -> None:
         if not providers:
-            raise ValueError("LLMClient necesita al menos un proveedor.")
+            raise ValueError("LLMClient requires at least one provider.")
         self.providers = providers
         self.logger = logger
         self.max_retries = max_retries
@@ -68,7 +68,7 @@ class LLMClient:
 
     @classmethod
     def from_settings(cls, settings: Settings) -> LLMClient:
-        """Arma la cadena primario + fallbacks definida en la configuración."""
+        """Build the configured primary-plus-fallback provider chain."""
         from core.logger import CallLogger
         from core.providers import build_provider
 
@@ -77,7 +77,7 @@ class LLMClient:
         return cls(providers, CallLogger(settings.log_path), settings.max_retries)
 
     def reset_totals(self) -> UsageTotals:
-        """Regresa el acumulado actual y empieza uno nuevo."""
+        """Return the current totals and start a new accumulator."""
         previous, self.totals = self.totals, UsageTotals()
         return previous
 
@@ -89,10 +89,10 @@ class LLMClient:
         response_format: dict | None = None,
         **params,
     ) -> LLMResponse:
-        """Pide una respuesta recorriendo los proveedores en orden.
+        """Request a response by trying providers in order.
 
-        - `TransientProviderError`: reintenta con backoff 1 s -> 2 s -> 4 s + jitter.
-        - `PermanentProviderError`: no reintenta; pasa al siguiente proveedor.
+        - `TransientProviderError`: retry with 1 s -> 2 s -> 4 s backoff plus jitter.
+        - `PermanentProviderError`: skip retries and advance to the next provider.
         - Si todos fallan: `AllProvidersFailedError`.
         """
         chars = prompt_chars(messages)
@@ -113,7 +113,7 @@ class LLMClient:
                         self._sleep(2**attempt + random.uniform(0, 0.25))
                         continue
                     errors.append(e)
-                    break  # Permanente o reintentos agotados: siguiente proveedor.
+                    break  # Permanent failure or retries exhausted: next provider.
                 self.logger.log(
                     provider=response.provider,
                     model=response.model,

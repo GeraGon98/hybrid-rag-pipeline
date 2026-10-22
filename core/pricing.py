@@ -1,13 +1,13 @@
-"""Cálculo de costo por llamada a partir de tokens de entrada y salida."""
+"""Per-call cost calculation from input and output token counts."""
 
 from __future__ import annotations
 
 import warnings
 
-# Precios ilustrativos. Revisa la tabla vigente de cada proveedor antes de usarlos para decisiones.
-# Formato: ID de modelo -> (USD por 1M tokens de entrada, USD por 1M tokens de salida).
+# Illustrative prices; verify each provider's current rates before making decisions.
+# Format: model ID -> (USD per 1M input tokens, USD per 1M output tokens).
 PRICES_PER_1M: dict[str, tuple[float, float]] = {
-    # Gemini (https://ai.google.dev/gemini-api/docs/pricing, nivel de pago)
+    # Gemini (https://ai.google.dev/gemini-api/docs/pricing, paid tier)
     "gemini-3.8-flash": (0.75, 3.75),
     "gemini-3.5-flash-lite": (0.30, 2.50),
     "gemini-2.5-flash": (0.30, 2.50),
@@ -21,10 +21,9 @@ _warned_models: set[str] = set()
 
 
 def cost_usd(model: str, tokens_in: int, tokens_out: int, provider: str | None = None) -> float:
-    """Devuelve el costo en USD de una llamada.
+    """Return the USD cost of one call.
 
-    Ollama corre en tu máquina, así que siempre cuesta 0.0. Si el modelo no está en la
-    tabla devuelve 0.0 y avisa una sola vez por modelo.
+    Local Ollama calls always cost 0.0. Unknown models return 0.0 and emit one warning.
     """
     if provider == "ollama":
         return 0.0
@@ -33,7 +32,7 @@ def cost_usd(model: str, tokens_in: int, tokens_out: int, provider: str | None =
         if model not in _warned_models:
             _warned_models.add(model)
             warnings.warn(
-                f"Modelo sin precio en core/pricing.py: {model!r}. Se registra costo 0.0.",
+                f"Model has no price in core/pricing.py: {model!r}. Recording cost 0.0.",
                 stacklevel=2,
             )
         return 0.0

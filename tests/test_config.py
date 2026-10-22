@@ -22,7 +22,7 @@ def test_missing_key_names_env_var():
 
 
 def test_unknown_provider():
-    with pytest.raises(ValidationError, match="desconocido"):
+    with pytest.raises(ValidationError, match="Unknown provider"):
         make(primary="openai", fallbacks=[])
 
 

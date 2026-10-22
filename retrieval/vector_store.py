@@ -1,4 +1,4 @@
-"""Indexación y búsqueda vectorial con Qdrant en modo embebido (sin servidor)."""
+"""Vector indexing and search with embedded, serverless Qdrant."""
 
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ _ID_NAMESPACE = uuid.UUID("6f1c2a52-6d1e-4c39-9a51-6b0f3c2d9e10")
 
 
 class VectorStore:
-    """`path=None` usa una colección en memoria (útil en tests)."""
+    """`path=None` uses an in-memory collection, which is useful in tests."""
 
     def __init__(
         self, embedder: Embedder, path: Path | None = None, collection: str = COLLECTION
@@ -30,7 +30,7 @@ class VectorStore:
             self.client = QdrantClient(path=str(path))
 
     def index(self, chunks: list[Chunk], batch_size: int = 64) -> None:
-        """Reemplaza la colección completa con los chunks dados."""
+        """Replace the entire collection with the supplied chunks."""
         if self.client.collection_exists(self.collection):
             self.client.delete_collection(self.collection)
         self.client.create_collection(
@@ -47,9 +47,9 @@ class VectorStore:
             self.client.upsert(self.collection, points=points)
 
     def search(self, query: str, k: int) -> list[tuple[str, float]]:
-        """`(chunk_id, similitud coseno)` de los `k` chunks más cercanos."""
+        """Return `(chunk_id, cosine_similarity)` for the `k` nearest chunks."""
         if not self.client.collection_exists(self.collection):
-            raise FileNotFoundError("No hay índice vectorial. Corre `main.py ingest` primero.")
+            raise FileNotFoundError("No vector index found. Run `main.py ingest` first.")
         result = self.client.query_points(
             self.collection, query=self.embedder.embed_query(query), limit=k, with_payload=True
         )
